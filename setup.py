@@ -27,6 +27,7 @@ setup(
         "ldap3",
         "Flask-Login",
         "Flask-Principal",
-        "Flask"
+        "Flask",
+        "Flask-wtf"
   ],
 )
