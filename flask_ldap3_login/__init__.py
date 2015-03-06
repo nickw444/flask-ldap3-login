@@ -48,8 +48,6 @@ class LDAP3LoginManager(object):
         app.config.setdefault('LDAP_USER_DN', '')
         app.config.setdefault('LDAP_GROUP_DN', '')
 
-
-
         app.config.setdefault('LDAP_USER_SEARCH_SCOPE', 'SEARCH_SCOPE_SINGLE_LEVEL')
         app.config.setdefault('LDAP_GROUP_SEARCH_SCOPE', 'SEARCH_SCOPE_SINGLE_LEVEL')
 
@@ -100,8 +98,9 @@ class LDAP3LoginManager(object):
 
     def save_user(self, callback):
         '''
-        This sets the callback for staving a user that has been looked up from from ldap. 
-        The function you set should take a username (unicode) and and userdata (dict).
+        This sets the callback for saving a user that has been looked up from from ldap. 
+        The function you set should take a user dn (unicode), username (unicode) 
+        and userdata (dict).
         :param callback: The callback for retrieving a user object.
         '''
 
@@ -118,6 +117,9 @@ class LDAP3LoginManager(object):
             # We need to search the User's DN to find who the user is (and their DN)
             # so we can try bind with their password.
             result = self.authenticate_search_bind(username, password)
+
+        if result.status == AuthenticationResponseStatus.success and self._save_user:
+            self._save_user(result.user_dn, result.user_id, result.user_info)
 
         return result
 
@@ -144,9 +146,14 @@ class LDAP3LoginManager(object):
             response.status = AuthenticationResponseStatus.success
             # Get user info here.
 
+            user_info = self.get_user_info(dn=bind_user, _connection=connection)
+            response.user_dn = bind_user
+            response.user_id = username
+            response.user_info = user_info
+
+
         except ldap3.LDAPInvalidCredentialsResult as e:
-            log.debug("Authentication for user '{}' returned with "\
-                "result '{}'".format(username, e))
+            log.debug("Authentication was not successful for user '{}'".format(username))
             response.status = AuthenticationResponseStatus.fail
         except Exception as e:
             self.destroy_connection(connection)
@@ -215,7 +222,7 @@ class LDAP3LoginManager(object):
                     # Populate User Data
                     user['attributes']['dn'] = user['dn']
                     response.user_info = user['attributes']
-                    response.user_id = username,
+                    response.user_id = username
                     response.user_dn = user['dn']
                     break
 
@@ -235,8 +242,32 @@ class LDAP3LoginManager(object):
     def get_user_groups(self):
         pass
 
-    def get_user_info(self, uid, connection=None):
+    def get_user_info(self, dn, _connection=None):
+        connection = _connection
+        if not connection:
+            connection = self.make_connection(
+                bind_user=app.config.get('LDAP_BIND_USER_DN'),
+                bind_password=app.config.get('LDAP_BIND_USER_PASSWORD')
+            )
+        
+        connection.search(
+            search_base=dn,
+            search_filter=self.config.get('LDAP_USER_OBJECT_FILTER'),
+            attributes=self.config.get('LDAP_GET_USER_ATTRIBUTES')
+        )
 
+        user_info = None
+        if len(connection.response) > 0:
+            user_info = connection.response[0]['attributes']
+            user_info['dn'] = dn
+
+        if not _connection:
+            # We made a connection, so we need to kill it.
+            self.destroy_connection(connection)
+
+        return user_info
+
+    def get_group_info(self, dn):
         pass
 
     def make_connection(self, bind_user=None, bind_password=None):
