@@ -356,6 +356,7 @@ class LDAP3LoginManager(object):
                     response.user_info = user['attributes']
                     response.user_id = username
                     response.user_dn = user['dn']
+                    response.user_groups = self.get_user_groups(dn=user['dn'], _connection=connection)
                     self.destroy_connection(user_connection)
                     break
 
