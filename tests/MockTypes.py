@@ -1,4 +1,4 @@
-from unittest import mock
+import mock
 from Directory import DIRECTORY, get_directory_base
 import ldap3
 import logging

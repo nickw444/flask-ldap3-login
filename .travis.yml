@@ -12,6 +12,7 @@ python:
 install:
   - pip install .
   - pip install coveralls
+  - pip install mock
 # command to run tests
 script: coverage run --source=flask_ldap3_login tests/__main__.py
 

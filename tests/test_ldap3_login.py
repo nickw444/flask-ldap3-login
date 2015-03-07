@@ -1,7 +1,7 @@
 import unittest
 import flask.ext.ldap3_login as ldap3_login
 import flask 
-from unittest import mock
+import mock
 
 import logging
 log = logging.getLogger(__name__)
