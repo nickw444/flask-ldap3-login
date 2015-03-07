@@ -1,0 +1,5 @@
+ldap3
+Flask
+Flask-wtf
+enum34
+sphinxcontrib-napoleon
