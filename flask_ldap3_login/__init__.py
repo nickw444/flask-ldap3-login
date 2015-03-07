@@ -115,6 +115,7 @@ class LDAP3LoginManager(object):
             use_ssl=self.config.get('LDAP_USE_SSL')
         )
 
+
     def add_server(self, hostname, port, use_ssl):
         """
         Add an additional server to the server pool and return the 
@@ -264,7 +265,7 @@ class LDAP3LoginManager(object):
             response.user_dn = bind_user
             response.user_id = username
             response.user_info = user_info
-            response.user_groups = self.get_user_groups(user_dn=bind_user, _connection=connection)
+            response.user_groups = self.get_user_groups(dn=bind_user, _connection=connection)
 
 
         except ldap3.LDAPInvalidCredentialsResult as e:
