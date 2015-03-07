@@ -19,10 +19,6 @@ Flask-LDAP3-Login
     :alt: Supported Python versions
 
 
-
-
-
-
 Flask LDAP3 Login allows you to easily integrate your flask app with an LDAP
 directory. It can be used as an extension to Flask-Login and can even be used
 with Flask-Principal for permission and privilege management.
@@ -46,4 +42,4 @@ Flask LDAP3 Login **Wont**:
       group tracking should be done via `flask-login <https://flask-login.readthedocs.org/en/latest/>`_ and `flask-principal <https://pythonhosted.org/Flask-Principal/>`_  
 
 
-`View the Full Documentation <http://flask-ldap3-login.readthedocs.org/en/latest/>`_
+`View the Full Documentation at ReadTheDocs <http://flask-ldap3-login.readthedocs.org/en/latest/>`_
