@@ -26,7 +26,7 @@ setup(
   install_requires=[
         "ldap3",
         "Flask",
-        "Flask-wtf"
+        "Flask-wtf",
         "enum34"
   ],
   classifiers=[
