@@ -62,15 +62,19 @@ def build_comparison(cmp_string):
 class Server(mock.MagicMock):
     pass
 class Connection(mock.MagicMock):
-    def __init__(self, user=None, password=None, **kwargs):
+    def __init__(self, user=None, password=None, server=None, **kwargs):
         mock.MagicMock.__init__(self)
         self._response = []
         self._result = None
         self.user = user
         self.password = password
+        self.server = server
         pass
 
     def bind(self):
+        if not self.server or self.server.servers[0].host != 'ad.mydomain.com':
+            raise ldap3.LDAPBindError
+
         if self.user:
             # Validate the bind user.
             bind_user = get_directory_base(self.user)
@@ -143,3 +147,7 @@ class Connection(mock.MagicMock):
 
 class ServerPool(mock.MagicMock):
     pass
+
+
+
+

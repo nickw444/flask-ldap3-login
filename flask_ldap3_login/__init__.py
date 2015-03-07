@@ -4,7 +4,7 @@ import ldap3
 
 try:
     from flask import _app_ctx_stack as stack
-except ImportError:
+except ImportError: #pragma: no cover
     from flask import _request_ctx_stack as stack
 
 
@@ -104,7 +104,7 @@ class LDAP3LoginManager(object):
 
         if hasattr(app, 'teardown_appcontext'):
             app.teardown_appcontext(self.teardown)
-        else:
+        else: #pragma: no cover
             app.teardown_request(self.teardown)
 
         self.app = app
@@ -167,6 +167,7 @@ class LDAP3LoginManager(object):
         """
         Cleanup after a request. Close any open connections.
         """
+
         ctx = stack.top
         if ctx is not None:
             if hasattr(ctx, 'ldap3_manager_connections'):
@@ -273,9 +274,8 @@ class LDAP3LoginManager(object):
             log.debug("Authentication was not successful for user '{0}'".format(username))
             response.status = AuthenticationResponseStatus.fail
         except Exception as e:
-            self.destroy_connection(connection)
             log.error(e)
-            raise e
+            response.status = AuthenticationResponseStatus.fail
         
         self.destroy_connection(connection)
         return response
@@ -309,7 +309,7 @@ class LDAP3LoginManager(object):
         except Exception as e:
             self.destroy_connection(connection)
             log.error(e)
-            raise e
+            return AuthenticationResponse()
 
         # Find the user in the search path.
         user_filter = '({search_attr}={username})'.format(

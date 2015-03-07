@@ -27,7 +27,7 @@ DIRECTORY = {
                     'givenname': ['Fake'],
                     'objectclass': ['inetOrgPerson'],
                     'dn': 'cn=Fake User,ou=users,dc=mydomain,dc=com',
-                    'password': 'fake123'
+                    'password': 'fake321',
                 },
 
             },

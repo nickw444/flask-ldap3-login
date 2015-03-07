@@ -2,7 +2,7 @@ import unittest
 import flask.ext.ldap3_login as ldap3_login
 import flask 
 import mock
-
+from flask import abort
 import logging
 log = logging.getLogger(__name__)
 
@@ -91,6 +91,52 @@ class AuthenticateDirectTestCase(BaseTestCase):
             self.assertTrue(form.validate())
             assert form.user['dn'] in users
 
+
+
+@mock.patch('ldap3.ServerPool', new=ServerPool)
+@mock.patch('ldap3.Server', new=Server)
+@mock.patch('ldap3.Connection', new=Connection)
+class BadServerAddressTestCase(BaseTestCase):
+    def setUp(self):
+        app = flask.Flask(__name__)
+        app.config['LDAP_HOST'] = 'ad2.mydomain.com'
+        app.config['LDAP_BASE_DN'] = 'dc=mydomain,dc=com'
+        app.config['LDAP_USER_DN'] = 'ou=users'
+        app.config['LDAP_GROUP_DN'] = 'ou=groups'
+        app.config['LDAP_BIND_USER_DN'] = 'cn=Bind,dc=mydomain,dc=com'
+        app.config['LDAP_BIND_USER_PASSWORD'] = 'bind123'
+        app.config['LDAP_USER_RDN_ATTR'] = 'uid'
+        app.config['LDAP_USER_LOGIN_ATTR'] = 'mail'
+        app.config['SECRET_KEY'] = 'secrets'
+        app.config['WTF_CSRF_ENABLED'] = False
+
+        self.app = app
+        ldap3_manager = ldap3_login.LDAP3LoginManager(app)
+        self.manager = ldap3_manager
+
+        self.manager.config.update({
+            'LDAP_USER_RDN_ATTR':'cn',
+            'LDAP_USER_LOGIN_ATTR':'cn',
+            'LDAP_HOST': 'ad2.mydomain.com',
+        })
+
+    def test_direct_bind_with_bad_server(self):
+        r = self.manager.authenticate('Nick Whyte', 'fake123')
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.fail)
+        r = self.manager.authenticate('Nick Whyte', 'fake1234')
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.fail)
+
+    def test_search_bind_with_bad_server(self):
+        self.manager.config.update({
+            'LDAP_USER_RDN_ATTR':'cn',
+            'LDAP_USER_LOGIN_ATTR':'mail',
+            'LDAP_HOST': 'ad2.mydomain.com',
+        })
+        r = self.manager.authenticate('nick@nickwhyte.com', 'fake123')
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.fail)
+        r = self.manager.authenticate('nick@nickwhyte.com', 'fake1234')
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.fail)
+
 @mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
@@ -143,6 +189,47 @@ class AuthenticateSearchTestCase(BaseTestCase):
             self.assertTrue(form.validate())
             assert form.user['dn'] in users
 
+            form = LDAPLoginForm(username='nick@nickwhyte.com', password='fake1234')
+            self.assertFalse(form.validate())
+
+@mock.patch('ldap3.ServerPool', new=ServerPool)
+@mock.patch('ldap3.Server', new=Server)
+@mock.patch('ldap3.Connection', new=Connection)
+class LDAPLoginFormTestCase(BaseTestCase):
+    def test_invalid_form_data(self):
+        with self.app.test_request_context():
+            form = LDAPLoginForm(password='fake1234')
+            self.assertFalse(form.validate())
+
+    def test_with_valid_form_data_invalid_ldap(self):
+        with self.app.test_request_context():
+            form = LDAPLoginForm(username='nick@nickwhyte.com', password='fake1234')
+            self.assertFalse(form.validate())
+
+@mock.patch('ldap3.ServerPool', new=ServerPool)
+@mock.patch('ldap3.Server', new=Server)
+@mock.patch('ldap3.Connection', new=Connection)
+class FailOnMultipleFoundTestCase(BaseTestCase):
+    
+    def test_ambiguious_login_field(self):
+        self.manager.config.update({
+            'LDAP_USER_RDN_ATTR':'cn',
+            'LDAP_USER_LOGIN_ATTR':'objectclass',
+        })
+
+        r = self.manager.authenticate('inetOrgPerson', 'fake123')
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.success)
+        r = self.manager.authenticate('inetOrgPerson', 'fake321')
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.success)
+
+        self.manager.config.update({
+            'LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND': True
+        })
+        r = self.manager.authenticate('inetOrgPerson', 'fake123')
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.fail)
+        r = self.manager.authenticate('inetOrgPerson', 'fake321')
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.fail)
+
 @mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
@@ -187,16 +274,28 @@ class SessionContextTextCase(BaseTestCase):
         with self.app.test_request_context():
             connection = self.manager.connection
             self.assertTrue(hasattr(stack.top, 'ldap3_manager_main_connection'))
+            connection2 = self.manager.connection
+
+            self.assertEqual(connection, connection2)
 
         with self.app.test_request_context():
             # Get a new context
             self.assertFalse(hasattr(stack.top, 'ldap3_manager_main_connection'))
 
-def test_suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(AuthenticateDirectTestCase))
-    suite.addTest(unittest.makeSuite(AuthenticateSearchTestCase))
-    suite.addTest(unittest.makeSuite(GroupMembershipTestCase))
-    suite.addTest(unittest.makeSuite(GroupExistsTestCase))
-    suite.addTest(unittest.makeSuite(SessionContextTextCase))
-    return suite
+
+    def test_context_pop_on_exception(self):
+        try:
+            with self.app.test_request_context():
+                connection = self.manager.connection
+                other_connection = self.manager._make_connection()
+                self.assertEqual(len(stack.top.ldap3_manager_connections), 1)
+                # Raise an exception so teardown gets done
+                abort(404)
+        except Exception as e:
+            pass
+        
+        with self.app.test_request_context():
+            self.assertFalse(hasattr(stack.top, 'ldap3_manager_main_connection'))
+            self.assertFalse(hasattr(stack.top, 'ldap3_manager_connections'))
+
+
