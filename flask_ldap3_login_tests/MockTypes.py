@@ -53,8 +53,10 @@ def build_comparison(cmp_string):
         match = single_filter.match(cmp_string)
         if match:
             field, value = match.group(1, 2)
+            def lamb(data):
+                return type(data) == dict and field in data and value in data[field]
 
-            return lambda data: type(data) == dict and  value in data[field]
+            return lamb
         else:
             raise Exception("Malformed Filter '{0}'".format(cmp_string))
 

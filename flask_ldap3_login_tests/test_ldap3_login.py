@@ -249,6 +249,17 @@ class GroupMembershipTestCase(BaseTestCase):
         assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'] in groups
         assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'] not in groups
 
+@mock.patch('ldap3.ServerPool', new=ServerPool)
+@mock.patch('ldap3.Server', new=Server)
+@mock.patch('ldap3.Connection', new=Connection)
+class GetUserInfoTestCase(BaseTestCase):
+
+    def test_get_user_info_for_username(self):
+        user = self.manager.get_user_info_for_username(
+            'nick@nickwhyte.com'
+        )
+        self.assertEqual(user, DIRECTORY['dc=com']['dc=mydomain']['ou=users']['cn=Nick Whyte'])
+
 
 @mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)

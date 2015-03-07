@@ -374,7 +374,7 @@ class LDAP3LoginManager(object):
         self.destroy_connection(connection)
         return response
 
-    def get_user_groups(self, dn, _connection=None):
+    def get_user_groups(self, dn, group_search_dn=None, _connection=None):
         """
         Gets a list of groups a user at dn is a member of
         
@@ -383,6 +383,8 @@ class LDAP3LoginManager(object):
             _connection (ldap3.Connection): A connection object to use when 
                 searching. If not given, a temporary connection will be 
                 created, and destroyed after use.
+            group_search_dn (str): The search dn for groups. Defaults to 
+                ``'{LDAP_GROUP_DN},{LDAP_BASE_DN}'``.
 
         Returns:
             list: A list of LDAP groups the user is a member of.
@@ -403,7 +405,7 @@ class LDAP3LoginManager(object):
         )
 
         connection.search(
-            search_base=self.full_group_search_dn,
+            search_base=group_search_dn or self.full_group_search_dn,
             search_filter=search_filter,
             attributes=self.config.get('LDAP_GET_GROUP_ATTRIBUTES'),
             search_scope=getattr(ldap3, self.config.get('LDAP_GROUP_SEARCH_SCOPE'))
@@ -438,6 +440,34 @@ class LDAP3LoginManager(object):
         return self.get_object(
             dn=dn, 
             filter=self.config.get('LDAP_USER_OBJECT_FILTER'),
+            attributes=self.config.get("LDAP_GET_USER_ATTRIBUTES"),
+            _connection=_connection,
+        )
+
+    def get_user_info_for_username(self, username, _connection=None):
+        """
+        Gets info about a user at a specified username by searching the 
+        Users DN. Username attribute is the same as specified as 
+        LDAP_USER_LOGIN_ATTR.
+
+
+        Args: 
+            username (str): Username of the user to search for.
+            _connection (ldap3.Connection): A connection object to use when 
+                searching. If not given, a temporary connection will be 
+                created, and destroyed after use.
+        Returns:
+            dict: A dictionary of the user info from LDAP
+        """
+        ldap_filter = '(&({0}={1}){2})'.format(
+            self.config.get('LDAP_USER_LOGIN_ATTR'),
+            username,
+            self.config.get('LDAP_USER_OBJECT_FILTER')
+        )
+
+        return self.get_object(
+            dn=self.full_user_search_dn, 
+            filter=ldap_filter,
             attributes=self.config.get("LDAP_GET_USER_ATTRIBUTES"),
             _connection=_connection,
         )
@@ -497,7 +527,7 @@ class LDAP3LoginManager(object):
         data = None
         if len(connection.response) > 0:
             data = connection.response[0]['attributes']
-            data['dn'] = dn
+            data['dn'] = connection.response[0]['dn']
 
         if not _connection:
             # We made a connection, so we need to kill it.
@@ -594,10 +624,7 @@ class LDAP3LoginManager(object):
         Returns:
             str: Full user search dn
         """
-        return '{user_dn},{base_dn}'.format(
-            user_dn=self.config.get('LDAP_USER_DN'),
-            base_dn=self.config.get('LDAP_BASE_DN'),
-        )
+        return self.compiled_sub_dn(self.config.get('LDAP_USER_DN'))
 
     @property
     def full_group_search_dn(self):
@@ -607,9 +634,19 @@ class LDAP3LoginManager(object):
         Returns:
             str: Full group search dn
         """
+        return self.compiled_sub_dn(self.config.get('LDAP_GROUP_DN'))
 
-        return '{group_dn},{base_dn}'.format(
-            group_dn=self.config.get('LDAP_GROUP_DN'),
-            base_dn=self.config.get('LDAP_BASE_DN'),
+    def compiled_sub_dn(self, prepend):
+        """
+        Returns: 
+            str: A DN with the DN Base appended to the end.
+
+        Args:
+            prepend (str): The dn to prepend to the base.
+        """
+
+        return '{prepend},{base}'.format(
+            prepend=prepend,
+            base=self.config.get('LDAP_BASE_DN')
         )
 
