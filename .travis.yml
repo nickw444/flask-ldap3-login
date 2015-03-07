@@ -13,6 +13,6 @@ install:
   - pip install coveralls
   - pip install mock
 # command to run tests
-script: coverage run --source=flask_ldap3_login tests/__main__.py
+script: coverage run tests/__main__.py
 
 after_success: coveralls
