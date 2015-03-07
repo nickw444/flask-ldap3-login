@@ -11,5 +11,8 @@ python:
 # command to install dependencies
 install:
   - pip install .
+  - pip install coveralls
 # command to run tests
-script: make test
+script: coverage run --source=flask_ldap3_login tests
+
+after_success: coveralls

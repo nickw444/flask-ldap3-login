@@ -33,13 +33,4 @@ class BasicTestCase(unittest.TestCase):
         r = self.manager.authenticate('', '')
         print(r.status == ldap3_login.AuthenticationResponseStatus.success)
 
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(BasicTestCase))
-    return suite
 
-if __name__ == '__main__':
-    import logging
-
-    logging.basicConfig(level=logging.DEBUG)
-    unittest.main(defaultTest='suite')

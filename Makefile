@@ -1,4 +1,0 @@
-
-
-test:
-	echo "Testing"

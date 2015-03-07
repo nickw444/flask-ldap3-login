@@ -12,7 +12,6 @@ version_path = os.path.join(os.path.dirname(
 )
 version = open(version_path).read()
 
-
 setup(
   name='flask-ldap3-login',
   version=version,
