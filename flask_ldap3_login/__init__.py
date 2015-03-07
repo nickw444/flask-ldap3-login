@@ -90,7 +90,7 @@ class LDAP3LoginManager(object):
 
         # Ldap Filters
         self.config.setdefault('LDAP_USER_SEARCH_SCOPE', 'SEARCH_SCOPE_SINGLE_LEVEL')
-        self.config.setdefault('LDAP_USER_OBJECT_FILTER', '(objectclass=inetorgperson)')
+        self.config.setdefault('LDAP_USER_OBJECT_FILTER', '(objectclass=inetOrgPerson)')
         self.config.setdefault('LDAP_USER_LOGIN_ATTR', 'uid')
         self.config.setdefault('LDAP_USER_RDN_ATTR', 'uid')
         self.config.setdefault('LDAP_GET_USER_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
@@ -257,7 +257,7 @@ class LDAP3LoginManager(object):
 
         try:
             connection.bind()
-            log.debug("Authentication was successful for user '{}'".format(username))
+            log.debug("Authentication was successful for user '{0}'".format(username))
             response.status = AuthenticationResponseStatus.success
             # Get user info here.
 
@@ -269,7 +269,7 @@ class LDAP3LoginManager(object):
 
 
         except ldap3.LDAPInvalidCredentialsResult as e:
-            log.debug("Authentication was not successful for user '{}'".format(username))
+            log.debug("Authentication was not successful for user '{0}'".format(username))
             response.status = AuthenticationResponseStatus.fail
         except Exception as e:
             self.destroy_connection(connection)
@@ -302,7 +302,7 @@ class LDAP3LoginManager(object):
         
         try:
             connection.bind()
-            log.debug("Successfully bound to LDAP as '{}' for search_bind method".format(
+            log.debug("Successfully bound to LDAP as '{0}' for search_bind method".format(
                 self.config.get('LDAP_BIND_USER_DN') or 'Anonymous'
             ))
         except Exception as e:
@@ -315,7 +315,7 @@ class LDAP3LoginManager(object):
             search_attr=self.config.get('LDAP_USER_LOGIN_ATTR'),
             username=username
         )
-        search_filter = '(&{}{})'.format(
+        search_filter = '(&{0}{1})'.format(
             self.config.get('LDAP_USER_OBJECT_FILTER'),
             user_filter,
         )
@@ -333,7 +333,7 @@ class LDAP3LoginManager(object):
         (self.config.get('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND')\
         and len(connection.response) > 1):
             # Don't allow them to log in.
-            log.debug("Authentication was not successful for user '{}'".format(username))
+            log.debug("Authentication was not successful for user '{0}'".format(username))
 
         else:
             for user in connection.response:
@@ -344,10 +344,10 @@ class LDAP3LoginManager(object):
                     bind_password=password
                 )
 
-                log.debug("Directly binding a connection to a server with user:'{}'".format(user['dn']))
+                log.debug("Directly binding a connection to a server with user:'{0}'".format(user['dn']))
                 try:
                     user_connection.bind()
-                    log.debug("Authentication was successful for user '{}'".format(username))
+                    log.debug("Authentication was successful for user '{0}'".format(username))
                     response.status = AuthenticationResponseStatus.success
                     
                     # Populate User Data
@@ -360,7 +360,7 @@ class LDAP3LoginManager(object):
 
 
                 except ldap3.LDAPInvalidCredentialsResult as e:
-                    log.debug("Authentication was not successful for user '{}'".format(username))
+                    log.debug("Authentication was not successful for user '{0}'".format(username))
                     response.status = AuthenticationResponseStatus.fail
                 except Exception as e:
                     self.destroy_connection(user_connection)
@@ -553,7 +553,7 @@ class LDAP3LoginManager(object):
             authentication = getattr(ldap3, self.config.get(
                 'LDAP_BIND_AUTHENTICATION_TYPE'))
 
-        log.debug("Opening connection with bind user '{}'".format(
+        log.debug("Opening connection with bind user '{0}'".format(
             bind_user or 'Anonymous'))
         connection = ldap3.Connection(
             server=self._server_pool, 
@@ -580,7 +580,7 @@ class LDAP3LoginManager(object):
             connection (ldap3.Connection):  The connnection to destroy
         """
 
-        log.debug("Destroying connection at <{}>".format(hex(id(connection))))
+        log.debug("Destroying connection at <{0}>".format(hex(id(connection))))
         self._decontextualise_connection(connection)
         connection.unbind()
 
