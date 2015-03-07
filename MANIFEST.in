@@ -1,2 +1,1 @@
-include LICENSE README.md setup.cfg VERSION
-recursive-include flask_boilerplate_utils/templates *.html
+include LICENSE README.rst setup.cfg VERSION
