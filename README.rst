@@ -45,3 +45,5 @@ Flask LDAP3 Login **Wont**:
     * Provide any extension to the application's session. User tracking  and 
       group tracking should be done via `flask-login <https://flask-login.readthedocs.org/en/latest/>`_ and `flask-principal <https://pythonhosted.org/Flask-Principal/>`_  
 
+
+`View the Full Documentation <http://flask-ldap3-login.readthedocs.org/en/latest/>`_
