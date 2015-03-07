@@ -1,5 +1,5 @@
 import mock
-from Directory import DIRECTORY, get_directory_base
+from .Directory import DIRECTORY, get_directory_base
 import ldap3
 import logging
 import re

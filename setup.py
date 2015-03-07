@@ -38,4 +38,5 @@ setup(
     'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 2.6',
   ],
+  test_suite="flask_ldap3_login_tests",
 )

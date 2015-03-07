@@ -6,8 +6,8 @@ import mock
 import logging
 log = logging.getLogger(__name__)
 
-from Directory import DIRECTORY, get_directory_base
-from MockTypes import Server, Connection, ServerPool
+from .Directory import DIRECTORY, get_directory_base
+from .MockTypes import Server, Connection, ServerPool
 
 from flask.ext.ldap3_login.forms import LDAPLoginForm
 
