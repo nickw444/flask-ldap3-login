@@ -3,6 +3,9 @@ Flask-LDAP3-Login
 .. image:: https://travis-ci.org/nickw444/flask-ldap3-login.svg?branch=master
     :target: https://travis-ci.org/nickw444/flask-ldap3-login
 
+.. image:: https://coveralls.io/repos/nickw444/flask-ldap3-login/badge.svg
+    :target: https://coveralls.io/r/nickw444/flask-ldap3-login
+
 .. image:: https://pypip.in/download/flask-ldap3-login/badge.svg
     :target: https://pypi.python.org/pypi//flask-ldap3-login/
     :alt: Downloads
@@ -14,6 +17,11 @@ Flask-LDAP3-Login
 .. image:: https://pypip.in/py_versions/flask-ldap3-login/badge.svg
     :target: https://pypi.python.org/pypi/flask-ldap3-login/
     :alt: Supported Python versions
+
+
+
+
+
 
 Flask LDAP3 Login allows you to easily integrate your flask app with an LDAP
 directory. It can be used as an extension to Flask-Login and can even be used
