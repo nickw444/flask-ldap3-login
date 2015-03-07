@@ -10,10 +10,13 @@ class LDAPValidationError(validators.ValidationError):
 
 class LDAPLoginForm(Form):
     """
-    This is a form to be subclassed by your application. 
-    
-    Once validiated will have a `form.user` object that contains 
+    A basic loginform which can be subclassed by your application.
+    Upon validation, the form will check against ldap for a valid 
+    username/password combination. 
+
+    Once validiated will have a `form.user` object that contains
     a user object.
+
     """
 
     username = wtforms.TextField('Username', validators=[validators.Required()])
@@ -28,11 +31,6 @@ class LDAPLoginForm(Form):
         password = self.password.data
 
         result = ldap_mgr.authenticate(username, password)
-        print(result.__dict__)
-        print(result.status)
-        print(AuthenticationResponseStatus.success)
-        print(result.status is AuthenticationResponseStatus.success)
-
 
         if result.status == AuthenticationResponseStatus.success:
             self.user = ldap_mgr._save_user(
