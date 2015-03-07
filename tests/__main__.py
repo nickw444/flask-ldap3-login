@@ -5,5 +5,5 @@ if __name__ == '__main__':
     import logging
     import unittest
     suite = test_suite()
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.WARNING)
     unittest.main(defaultTest='suite')

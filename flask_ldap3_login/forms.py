@@ -3,7 +3,10 @@ import wtforms
 from wtforms import validators
 from flask import flash, current_app
 import ldap3
-from .__init__ import AuthenticationResponseStatus
+from flask.ext.ldap3_login import AuthenticationResponseStatus
+
+import logging
+log = logging.getLogger(__name__)
 
 class LDAPValidationError(validators.ValidationError):
     pass
@@ -19,12 +22,13 @@ class LDAPLoginForm(Form):
 
     """
 
-    username = wtforms.TextField('Username', validators=[validators.Required()])
+    username = wtforms.StringField('Username', validators=[validators.Required()])
     password = wtforms.PasswordField('Password', validators=[validators.Required()])
     submit = wtforms.SubmitField('Submit')
     remember_me = wtforms.BooleanField('Remember Me', default=True)
 
     def validate_ldap(self):
+        logging.debug('Validating LDAPLoginForm against LDAP')
         'Validate the username/password data against ldap directory'
         ldap_mgr = current_app.ldap3_login_manager
         username = self.username.data
@@ -57,6 +61,9 @@ class LDAPLoginForm(Form):
         """
 
         valid = Form.validate(self, *args, **kwargs)
-        if not valid: return valid
+        if not valid: 
+            logging.debug("Form validation failed before we had a change to "\
+                "check ldap. Reasons: '{0}'".format(self.errors))
+            return valid
 
         return self.validate_ldap()

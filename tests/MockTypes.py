@@ -74,7 +74,8 @@ class Connection(mock.MagicMock):
         if self.user:
             # Validate the bind user.
             bind_user = get_directory_base(self.user)
-            if self.password == bind_user['password']:
+
+            if bind_user and self.password == bind_user['password']:
                 return True
 
             raise ldap3.LDAPInvalidCredentialsResult
@@ -94,7 +95,11 @@ class Connection(mock.MagicMock):
             # Perform a recursive search strategy
 
             def recurse_search(dictionary):
+
                 items = []
+                if check_user(dictionary):
+                    items.append(dictionary)
+
                 for item in dictionary.values():
                     if check_user(item):
                         items.append(item)
@@ -110,11 +115,13 @@ class Connection(mock.MagicMock):
             self._response = items
 
 
+
         elif search_scope == ldap3.LEVEL:
             
             matching = [dict(attributes=user, dn=user['dn']) for user in scoped_directory.values() if check_user(user)]
             self._result = len(matching) > 0
             self._response = matching
+
 
         elif search_scope == ldap3.BASE:
             result = check_user(scoped_directory)

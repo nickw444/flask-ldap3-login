@@ -265,6 +265,7 @@ class LDAP3LoginManager(object):
             response.user_dn = bind_user
             response.user_id = username
             response.user_info = user_info
+
             response.user_groups = self.get_user_groups(dn=bind_user, _connection=connection)
 
 

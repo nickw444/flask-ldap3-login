@@ -35,7 +35,7 @@ DIRECTORY = {
                 'cn=Staff': {
                     'cn': ['Staff'],
                     'description': ['A Group for staff'],
-                    'uniquemember': [
+                    'uniqueMember': [
                         'cn=Nick Whyte,ou=users,dc=mydomain,dc=com',
                         'cn=Fake User,ou=users,dc=mydomain,dc=com',
                     ],
@@ -45,7 +45,7 @@ DIRECTORY = {
                 'cn=Admins': {
                     'cn': ['Admins'],
                     'description': ['A Group for Admins'],
-                    'uniquemember': [
+                    'uniqueMember': [
                         'cn=Nick Whyte,ou=users,dc=mydomain,dc=com',
                     ],
                     'objectclass': ['groupOfUniqueNames'],
