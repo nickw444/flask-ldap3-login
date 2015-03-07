@@ -52,5 +52,4 @@ class BasicTestCase(unittest.TestCase):
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(BasicTestCase))
-
     return suite
