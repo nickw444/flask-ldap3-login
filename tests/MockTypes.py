@@ -82,7 +82,7 @@ class Connection(mock.MagicMock):
             return True
 
     def search(self, search_base='', search_filter='(objectClass=*)', search_scope=ldap3.SUBTREE, attributes=None):
-        log.info("Search began for base '{}' with filter '{}' in scope '{}' with attributes '{}'".format(
+        log.info("Search began for base '{0}' with filter '{1}' in scope '{2}' with attributes '{3}'".format(
             search_base, search_filter, search_scope, attributes
         ))
 

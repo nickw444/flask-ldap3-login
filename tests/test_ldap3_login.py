@@ -45,6 +45,12 @@ class BasicTestCase(unittest.TestCase):
 
     def test_basic(self):
         r = self.manager.authenticate('fake@nickwhyte.com', 'fake123')
-        print(r.status == ldap3_login.AuthenticationResponseStatus.success)
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.success)
 
 
+
+def test_suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(BasicTestCase))
+
+    return suite
