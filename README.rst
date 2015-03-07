@@ -1,5 +1,7 @@
 Flask-LDAP3-Login
 ============================================
+.. image:: https://travis-ci.org/nickw444/flask-ldap3-login.svg?branch=master
+    :target: https://travis-ci.org/nickw444/flask-ldap3-login
 
 .. image:: https://pypip.in/download/flask-ldap3-login/badge.svg
     :target: https://pypi.python.org/pypi//flask-ldap3-login/
