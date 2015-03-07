@@ -76,7 +76,7 @@ class AuthenticateDirectTestCase(BaseTestCase):
             r.user_info,
             r.user_groups
         )
-        self.assertIn(r.user_dn, users)
+        assert r.user_dn in users
 
     def test_save_user_in_form(self):
         users = {}
@@ -89,7 +89,7 @@ class AuthenticateDirectTestCase(BaseTestCase):
         with self.app.test_request_context():
             form = LDAPLoginForm(username='Nick Whyte', password='fake123')
             self.assertTrue(form.validate())
-            self.assertIn(form.user['dn'], users)
+            assert form.user['dn'] in users
 
 @mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
@@ -128,7 +128,7 @@ class AuthenticateSearchTestCase(BaseTestCase):
             r.user_info,
             r.user_groups
         )
-        self.assertIn(r.user_dn, users)
+        assert r.user_dn in users
 
     def test_save_user_in_form(self):
         users = {}
@@ -141,7 +141,7 @@ class AuthenticateSearchTestCase(BaseTestCase):
         with self.app.test_request_context():
             form = LDAPLoginForm(username='nick@nickwhyte.com', password='fake123')
             self.assertTrue(form.validate())
-            self.assertIn(form.user['dn'], users)
+            assert form.user['dn'] in users
 
 @mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
@@ -155,12 +155,12 @@ class GroupMembershipTestCase(BaseTestCase):
 
     def test_group_membership(self):
         groups = self.manager.get_user_groups(dn='cn=Nick Whyte,ou=users,dc=mydomain,dc=com')
-        self.assertIn(DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'], groups)
-        self.assertIn(DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'], groups)
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'] in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'] in groups
 
         groups = self.manager.get_user_groups(dn='cn=Fake User,ou=users,dc=mydomain,dc=com')
-        self.assertIn(DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'], groups)
-        self.assertNotIn(DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'], groups)
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'] in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'] not in groups
 
 
 @mock.patch('ldap3.ServerPool', new=ServerPool)
