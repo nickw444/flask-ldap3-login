@@ -25,9 +25,8 @@ setup(
   zip_safe=False,
   install_requires=[
         "ldap3",
-        "Flask-Login",
-        "Flask-Principal",
         "Flask",
         "Flask-wtf"
+        "enum34"
   ],
 )

@@ -18,7 +18,7 @@ Flask LDAP3 Login **Will**:
     * Query the directory for users details
     * Query the directory for group details
     * Query the directory for users group memberships
-    * Provide a contextual ``ldap_manager.connection`` object (ldap3.Connection)
+    * Provide a contextual ``ldap_manager.connection`` object (``ldap3.Connection``)
       which can be used in any flask request context. Useful for writing
       your own more advanced queries.
     

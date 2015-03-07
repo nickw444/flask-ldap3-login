@@ -17,18 +17,18 @@ class AuthenticationResponse(object):
     """
     A response object when authenticating. Lets us pass status codes around 
     and also user data.
+
+    Args:
+        status (AuthenticationResponseStatus):  The status of the result.
+        user_info (dict): User info dictionary obtained from LDAP.
+        user_id (str): User id used to authenticate to LDAP with.
+        user_dn (str): User DN found from LDAP.
+        user_groups (list): A list containing a dicts of group info.
     """
 
     def __init__(self, status=AuthenticationResponseStatus.fail, 
         user_info=None, user_id=None, user_dn=None, user_groups=None):
-        """
-        Args:
-            status (AuthenticationResponseStatus):  The status of the result.
-            user_info (dict): User info dictionary obtained from LDAP.
-            user_id (str): User id used to authenticate to LDAP with.
-            user_dn (str): User DN found from LDAP.
-            user_groups (list): A list containing a dicts of group info.
-        """
+        
 
         self.user_info = user_info,
         self.user_id= user_id,
@@ -38,16 +38,18 @@ class AuthenticationResponse(object):
 
 
 class LDAP3LoginManager(object):
+    """
+    Initialise a LDAP3LoginManager. If app is passed, init_app is called
+    within this call.
+
+    Args:
+        app (flask.Flask): The flask app to initialise with
+    """
+
     def __init__(self, app=None):
-        """
-        Initialise a LDAP3LoginManager. If app is passed, init_app is called
-        within this call.
-
-        Args:
-            app (flask.Flask): The flask app to initialise with
-        """
-
+    
         self._save_user = None
+        self.config = {}
         self._server_pool = ldap3.ServerPool(
             [],
             ldap3.POOLING_STRATEGY_FIRST,
@@ -67,37 +69,37 @@ class LDAP3LoginManager(object):
         Args:
             app (flask.Flask): The flask app to initialise with
         '''
-
+        self.config.update(app.config)
         app.ldap3_login_manager = self
 
-        app.config.setdefault('LDAP_PORT', 389)
-        app.config.setdefault('LDAP_HOST', None)
-        app.config.setdefault('LDAP_USE_SSL', False)
-        app.config.setdefault('LDAP_BASE_DN', '')
-        app.config.setdefault('LDAP_BIND_USER_DN', None)
-        app.config.setdefault('LDAP_BIND_USER_PASSWORD', None)
+        self.config.setdefault('LDAP_PORT', 389)
+        self.config.setdefault('LDAP_HOST', None)
+        self.config.setdefault('LDAP_USE_SSL', False)
+        self.config.setdefault('LDAP_BASE_DN', '')
+        self.config.setdefault('LDAP_BIND_USER_DN', None)
+        self.config.setdefault('LDAP_BIND_USER_PASSWORD', None)
         
-        app.config.setdefault('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND', False)
+        self.config.setdefault('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND', False)
 
         # Prepended to the Base DN to limit scope when searching for Users/Groups.
-        app.config.setdefault('LDAP_USER_DN', '')
-        app.config.setdefault('LDAP_GROUP_DN', '')
+        self.config.setdefault('LDAP_USER_DN', '')
+        self.config.setdefault('LDAP_GROUP_DN', '')
 
-        app.config.setdefault('LDAP_USER_SEARCH_SCOPE', 'SEARCH_SCOPE_SINGLE_LEVEL')
-        app.config.setdefault('LDAP_GROUP_SEARCH_SCOPE', 'SEARCH_SCOPE_SINGLE_LEVEL')
+        self.config.setdefault('LDAP_BIND_AUTHENTICATION_TYPE', 'AUTH_SIMPLE')
+        
 
         # Ldap Filters
-        app.config.setdefault('LDAP_USER_OBJECT_FILTER', '(objectclass=inetorgperson)')
-        app.config.setdefault('LDAP_USER_LOGIN_ATTR_HUMAN_NAME', 'User ID')
-        app.config.setdefault('LDAP_USER_LOGIN_ATTR', 'uid')
-        app.config.setdefault('LDAP_GROUP_OBJECT_FILTER', '(objectclass=groupOfUniqueNames)')
-        app.config.setdefault('LDAP_GROUP_MEMBERS_ATTR', 'uniqueMember')
-        app.config.setdefault('LDAP_USER_MEMBER_ATTR', 'memberOf')
-        app.config.setdefault('LDAP_USER_RDN_ATTR', 'uid')
-        app.config.setdefault('LDAP_GET_USER_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
-        app.config.setdefault('LDAP_GET_GROUP_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
+        self.config.setdefault('LDAP_USER_SEARCH_SCOPE', 'SEARCH_SCOPE_SINGLE_LEVEL')
+        self.config.setdefault('LDAP_USER_OBJECT_FILTER', '(objectclass=inetorgperson)')
+        self.config.setdefault('LDAP_USER_LOGIN_ATTR', 'uid')
+        self.config.setdefault('LDAP_USER_RDN_ATTR', 'uid')
+        self.config.setdefault('LDAP_GET_USER_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
 
-        app.config.setdefault('LDAP_BIND_AUTHENTICATION_TYPE', 'AUTH_SIMPLE')
+        self.config.setdefault('LDAP_GROUP_SEARCH_SCOPE', 'SEARCH_SCOPE_SINGLE_LEVEL')
+        self.config.setdefault('LDAP_GROUP_OBJECT_FILTER', '(objectclass=groupOfUniqueNames)')
+        self.config.setdefault('LDAP_GROUP_MEMBERS_ATTR', 'uniqueMember')
+        self.config.setdefault('LDAP_GET_GROUP_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
+
 
 
         if hasattr(app, 'teardown_appcontext'):
@@ -106,7 +108,6 @@ class LDAP3LoginManager(object):
             app.teardown_request(self.teardown)
 
         self.app = app
-        self.config = app.config
         
         self.add_server(
             hostname=self.config.get('LDAP_HOST'),
@@ -131,7 +132,7 @@ class LDAP3LoginManager(object):
         self._server_pool.add(server)
         return server
 
-    def contextualise_connection(self, connection):
+    def _contextualise_connection(self, connection):
         """
         Add a connection to the appcontext so it can be freed/unbound at 
         a later time if an exception occured and it was not freed.
@@ -147,7 +148,7 @@ class LDAP3LoginManager(object):
                 ctx.ldap3_manager_connections = [connection]
             else:
                 ctx.ldap3_manager_connections.append(connection)
-    def decontextualise_connection(self, connection):
+    def _decontextualise_connection(self, connection):
         """
         Remove a connection from the appcontext.
         
@@ -181,11 +182,14 @@ class LDAP3LoginManager(object):
         The function you set should take a user dn (unicode), username (unicode) 
         and userdata (dict), and memberships (list).
 
-        @ldap3_manager.save_user
-        def save_user(dn, username, userdata, memberships):
-            pass
+        ::
+
+            @ldap3_manager.save_user
+            def save_user(dn, username, userdata, memberships):
+                return User(username=username, data=userdata)
 
         Your callback function MUST return the user object in your ORM (or similar). 
+        as this is used within the LoginForm and placed at ``form.user``
 
         Args:
             callback (function): The function to be used as the save user callback.
@@ -509,8 +513,8 @@ class LDAP3LoginManager(object):
             ldap3.Connection: A bound ldap3.Connection
         Raises:
             ldap3.core.exceptions.LDAPException: Since this method is performing
-            a bind on behalf of the caller. You should handle this case occuring,
-            such as invalid service credentials.
+                a bind on behalf of the caller. You should handle this case 
+                occuring, such as invalid service credentials.
         """
         ctx = stack.top
         if ctx is not None and hasattr(ctx, 'ldap3_manager_main_connection'):
@@ -562,7 +566,7 @@ class LDAP3LoginManager(object):
         )
 
         if contextualise:
-            self.contextualise_connection(connection)
+            self._contextualise_connection(connection)
         return connection
 
 
@@ -576,7 +580,7 @@ class LDAP3LoginManager(object):
         """
 
         log.debug("Destroying connection at <{}>".format(hex(id(connection))))
-        self.decontextualise_connection(connection)
+        self._decontextualise_connection(connection)
         connection.unbind()
 
     @property
