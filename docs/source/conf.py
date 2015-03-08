@@ -51,7 +51,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'flask-ldap-login'
+project = 'flask-ldap3-login'
 copyright = '2015, Nick Whyte'
 
 # The version info for the project you're documenting, acts as replacement for
