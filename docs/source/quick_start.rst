@@ -16,3 +16,11 @@ This is a basic application which uses Flask-Login to handle user sessions.
 The application stores the users in the dictionary ``users``. 
 
 .. literalinclude:: ../../ldap_app.py
+
+
+Basic Scripting Usage (Without a Flask App)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is an example for if you wish to simply use the module, maybe for testing or for use in some other environment.
+
+.. literalinclude:: ../../ldap_noapp.py

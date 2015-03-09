@@ -374,10 +374,12 @@ class LDAP3LoginManager(object):
                 except ldap3.LDAPInvalidCredentialsResult as e:
                     log.debug("Authentication was not successful for user '{0}'".format(username))
                     response.status = AuthenticationResponseStatus.fail
-                except Exception as e:
-                    self.destroy_connection(user_connection)
-                    log.error(e)
-                    raise e
+                except Exception as e: #pragma: no cover 
+                    # This should never happen, however in case ldap3 does ever throw an error here,
+                    # we catch it and log it
+                    log.error(e) 
+                    response.status = AuthenticationResponseStatus.fail
+
 
                 self.destroy_connection(user_connection)
 
@@ -560,7 +562,13 @@ class LDAP3LoginManager(object):
                 occuring, such as invalid service credentials.
         """
         ctx = stack.top
-        if ctx is not None and hasattr(ctx, 'ldap3_manager_main_connection'):
+        if ctx is None:
+            raise Exception("Working outside of the Flask application "\
+                "context. If you wish to make a connection outside of a flask"\
+                " application context, please handle your connections "\
+                "and use manager.make_connection()")
+
+        if hasattr(ctx, 'ldap3_manager_main_connection'):
             return ctx.ldap3_manager_main_connection
         else:
             connection = self._make_connection(
@@ -572,8 +580,26 @@ class LDAP3LoginManager(object):
             if ctx is not None:
                 ctx.ldap3_manager_main_connection = connection
             return connection
+    def make_connection(self, bind_user=None, bind_password=None, **kwargs):
+        """
+        Make a connection to the LDAP Directory.
 
-    def _make_connection(self, bind_user=None, bind_password=None, contextualise=True):
+        Args:
+            bind_user (str): User to bind with. If `None`, AUTH_ANONYMOUS is 
+                used, otherwise authentication specified with 
+                config['LDAP_BIND_AUTHENTICATION_TYPE'] is used.
+            bind_password (str): Password to bind to the directory with
+            **kwargs (dict): Additional arguments to pass to the 
+                ``ldap3.Connection``
+
+        Returns: 
+            ldap3.Connection: An unbound ldap3.Connection. You should handle exceptions 
+                upon bind if you use this internal method.
+        """
+
+        return self._make_connection(bind_user, bind_password, contextualise=False, **kwargs)
+
+    def _make_connection(self, bind_user=None, bind_password=None, contextualise=True, **kwargs):
         """
         Make a connection.
 
@@ -605,7 +631,8 @@ class LDAP3LoginManager(object):
             client_strategy=ldap3.STRATEGY_SYNC,
             authentication=authentication,
             check_names=True,
-            raise_exceptions=True
+            raise_exceptions=True,
+            **kwargs
         )
 
         if contextualise:
@@ -654,7 +681,9 @@ class LDAP3LoginManager(object):
         Args:
             prepend (str): The dn to prepend to the base.
         """
-
+        prepend = prepend.strip()
+        if prepend == '':
+            return self.config.get('LDAP_BASE_DN')
         return '{prepend},{base}'.format(
             prepend=prepend,
             base=self.config.get('LDAP_BASE_DN')

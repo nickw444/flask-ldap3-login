@@ -91,6 +91,26 @@ class AuthenticateDirectTestCase(BaseTestCase):
             self.assertTrue(form.validate())
             assert form.user['dn'] in users
 
+@mock.patch('ldap3.ServerPool', new=ServerPool)
+@mock.patch('ldap3.Server', new=Server)
+@mock.patch('ldap3.Connection', new=Connection)
+class EmptyUserGroupDNTestCase(BaseTestCase):
+    def setUp(self):
+        super(EmptyUserGroupDNTestCase, self).setUp()
+
+        self.manager.config.update({
+            'LDAP_USER_RDN_ATTR':'cn',
+            'LDAP_USER_LOGIN_ATTR':'cn',
+            'LDAP_BASE_DN': 'ou=users,dc=mydomain,dc=com',
+            'LDAP_USER_DN': '',
+            'LDAP_GROUP_DN': '',
+        })
+
+    def test_login(self):
+        r = self.manager.authenticate('Nick Whyte', 'fake123')
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.success)
+        r = self.manager.authenticate('Nick Whyte', 'fake1234')
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.fail)
 
 
 @mock.patch('ldap3.ServerPool', new=ServerPool)
@@ -134,6 +154,25 @@ class NoFlaskAppTestCase(unittest.TestCase):
             r.user_groups
         )
         assert r.user_dn in users
+
+    def test_connection_outside_of_flask(self):
+        exception_raised = False
+        try:
+            self.manager.connection
+        except Exception:
+            exception_raised = True
+
+        self.assertTrue(exception_raised)
+
+    def test_make_connection(self):
+        connection = self.manager.make_connection(
+            'cn=Nick Whyte,ou=users,dc=mydomain,dc=com',
+            'fake123'
+        )
+        connection.bind()
+        connection.unbind()
+
+
 
 
 
