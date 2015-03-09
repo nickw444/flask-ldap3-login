@@ -71,7 +71,7 @@ class LDAP3LoginManager(object):
         '''
         
         app.ldap3_login_manager = self
-        self.add_config(app.config)
+        self.init_config(app.config)
 
         if hasattr(app, 'teardown_appcontext'):
             app.teardown_appcontext(self.teardown)
@@ -82,8 +82,16 @@ class LDAP3LoginManager(object):
         
         
 
-    def add_config(self, config):
-        self.config.update(app.config)
+    def init_config(self, config):
+        '''
+        Configures this extension with a given configuration dictionary.
+        This allows use of this extension without a flask app. 
+
+        Args:
+            config (dict): A dictionary with configuration keys
+        '''
+
+        self.config.update(config)
 
         self.config.setdefault('LDAP_PORT', 389)
         self.config.setdefault('LDAP_HOST', None)
