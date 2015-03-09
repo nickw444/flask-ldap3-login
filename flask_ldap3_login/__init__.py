@@ -69,8 +69,21 @@ class LDAP3LoginManager(object):
         Args:
             app (flask.Flask): The flask app to initialise with
         '''
-        self.config.update(app.config)
+        
         app.ldap3_login_manager = self
+        self.add_config(app.config)
+
+        if hasattr(app, 'teardown_appcontext'):
+            app.teardown_appcontext(self.teardown)
+        else: #pragma: no cover
+            app.teardown_request(self.teardown)
+
+        self.app = app
+        
+        
+
+    def add_config(self, config):
+        self.config.update(app.config)
 
         self.config.setdefault('LDAP_PORT', 389)
         self.config.setdefault('LDAP_HOST', None)
@@ -86,7 +99,6 @@ class LDAP3LoginManager(object):
         self.config.setdefault('LDAP_GROUP_DN', '')
 
         self.config.setdefault('LDAP_BIND_AUTHENTICATION_TYPE', 'AUTH_SIMPLE')
-        
 
         # Ldap Filters
         self.config.setdefault('LDAP_USER_SEARCH_SCOPE', 'SEARCH_SCOPE_SINGLE_LEVEL')
@@ -100,21 +112,11 @@ class LDAP3LoginManager(object):
         self.config.setdefault('LDAP_GROUP_MEMBERS_ATTR', 'uniqueMember')
         self.config.setdefault('LDAP_GET_GROUP_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
 
-
-
-        if hasattr(app, 'teardown_appcontext'):
-            app.teardown_appcontext(self.teardown)
-        else: #pragma: no cover
-            app.teardown_request(self.teardown)
-
-        self.app = app
-        
         self.add_server(
             hostname=self.config.get('LDAP_HOST'),
             port=self.config.get('LDAP_PORT'),
             use_ssl=self.config.get('LDAP_USE_SSL')
         )
-
 
     def add_server(self, hostname, port, use_ssl):
         """
