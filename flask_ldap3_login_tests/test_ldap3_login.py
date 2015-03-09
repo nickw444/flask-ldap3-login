@@ -96,6 +96,50 @@ class AuthenticateDirectTestCase(BaseTestCase):
 @mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
+class NoFlaskAppTestCase(unittest.TestCase):
+    def setUp(self):
+        config = dict(
+            LDAP_HOST='ad.mydomain.com',
+            LDAP_BASE_DN='dc=mydomain,dc=com',
+            LDAP_USER_DN='ou=users',
+            LDAP_GROUP_DN='ou=groups',
+            LDAP_BIND_USER_DN='cn=Bind,dc=mydomain,dc=com',
+            LDAP_BIND_USER_PASSWORD='bind123',
+            LDAP_USER_RDN_ATTR='cn',
+            LDAP_USER_LOGIN_ATTR='cn'
+        )
+        ldap3_manager = ldap3_login.LDAP3LoginManager()
+        ldap3_manager.init_config(config)
+        self.manager = ldap3_manager
+
+
+    def test_login(self):
+        r = self.manager.authenticate('Nick Whyte', 'fake123')
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.success)
+        r = self.manager.authenticate('Nick Whyte', 'fake1234')
+        self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.fail)
+
+    def test_save_user(self):
+        users = {}
+        @self.manager.save_user
+        def user_saver(dn, username, data, memberships):
+            users[dn] = data
+            return users[dn]
+
+        r = self.manager.authenticate('Nick Whyte', 'fake123')
+        self.manager._save_user(
+            r.user_dn,
+            r.user_id,
+            r.user_info,
+            r.user_groups
+        )
+        assert r.user_dn in users
+
+
+
+@mock.patch('ldap3.ServerPool', new=ServerPool)
+@mock.patch('ldap3.Server', new=Server)
+@mock.patch('ldap3.Connection', new=Connection)
 class BadServerAddressTestCase(BaseTestCase):
     def setUp(self):
         app = flask.Flask(__name__)
