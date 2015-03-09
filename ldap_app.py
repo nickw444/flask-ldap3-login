@@ -82,6 +82,14 @@ def home():
 
     return render_template_string(template)
 
+@app.route('/manual_login')
+def manual_login():
+    # Instead of using the form, you can alternatively authenticate
+    # using the authenticate method.
+    # This WILL NOT fire the save_user() callback defined above.
+    # You are responsible for saving your users.
+    app.ldap3_login_manager.authenticate('username','password')
+
 @app.route('/login', methods=['GET','POST'])
 def login():
     template = """
