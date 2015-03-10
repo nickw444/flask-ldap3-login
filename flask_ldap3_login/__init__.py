@@ -409,10 +409,11 @@ class LDAP3LoginManager(object):
                 bind_password=self.config.get('LDAP_BIND_USER_PASSWORD')
             )
             connection.bind()
-        
 
-        search_filter='(&{group_filter}(uniqueMember={user_dn}))'.format(
+
+        search_filter='(&{group_filter}({members_attr}={user_dn}))'.format(
             group_filter=self.config.get('LDAP_GROUP_OBJECT_FILTER'),
+            members_attr=self.config.get('LDAP_GROUP_MEMBERS_ATTR'),
             user_dn=dn
         )
 
