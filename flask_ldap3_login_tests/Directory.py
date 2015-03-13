@@ -4,7 +4,7 @@ DIRECTORY = {
             'cn=Bind': {
                 'cn': ['BIND'],
                 'mail': ['bind@localhost.com'],
-                'objectclass': ['inetOrgPerson'],
+                'objectclass': ['person'],
                 'dn': 'cn=Bind,dc=mydomain,dc=com',
                 'password': 'bind123'
             },
@@ -15,7 +15,7 @@ DIRECTORY = {
                     'website': ['http://www.nickwhyte.com'],
                     'sn': ['Whyte'],
                     'givenname': ['Nick'],
-                    'objectclass': ['inetOrgPerson'],
+                    'objectclass': ['person'],
                     'dn': 'cn=Nick Whyte,ou=users,dc=mydomain,dc=com',
                     'password': 'fake123'
                 },
@@ -25,7 +25,7 @@ DIRECTORY = {
                     'website': ['http://www.nickwhyte.com'],
                     'sn': ['User'],
                     'givenname': ['Fake'],
-                    'objectclass': ['inetOrgPerson'],
+                    'objectclass': ['person'],
                     'dn': 'cn=Fake User,ou=users,dc=mydomain,dc=com',
                     'password': 'fake321',
                 },
@@ -39,7 +39,7 @@ DIRECTORY = {
                         'cn=Nick Whyte,ou=users,dc=mydomain,dc=com',
                         'cn=Fake User,ou=users,dc=mydomain,dc=com',
                     ],
-                    'objectclass': ['groupOfUniqueNames'],
+                    'objectclass': ['group'],
                     'dn': 'cn=Staff,ou=groups,dc=mydomain,dc=com',
                 },
                 'cn=Admins': {
@@ -48,7 +48,7 @@ DIRECTORY = {
                     'uniqueMember': [
                         'cn=Nick Whyte,ou=users,dc=mydomain,dc=com',
                     ],
-                    'objectclass': ['groupOfUniqueNames'],
+                    'objectclass': ['group'],
                     'dn': 'cn=Admins,ou=groups,dc=mydomain,dc=com',
                 },
             }

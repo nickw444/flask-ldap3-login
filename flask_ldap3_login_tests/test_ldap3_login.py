@@ -300,17 +300,17 @@ class FailOnMultipleFoundTestCase(BaseTestCase):
             'LDAP_USER_LOGIN_ATTR':'objectclass',
         })
 
-        r = self.manager.authenticate('inetOrgPerson', 'fake123')
+        r = self.manager.authenticate('person', 'fake123')
         self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.success)
-        r = self.manager.authenticate('inetOrgPerson', 'fake321')
+        r = self.manager.authenticate('person', 'fake321')
         self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.success)
 
         self.manager.config.update({
             'LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND': True
         })
-        r = self.manager.authenticate('inetOrgPerson', 'fake123')
+        r = self.manager.authenticate('person', 'fake123')
         self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.fail)
-        r = self.manager.authenticate('inetOrgPerson', 'fake321')
+        r = self.manager.authenticate('person', 'fake321')
         self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.fail)
 
 @mock.patch('ldap3.ServerPool', new=ServerPool)
@@ -325,6 +325,7 @@ class GroupMembershipTestCase(BaseTestCase):
 
     def test_group_membership(self):
         groups = self.manager.get_user_groups(dn='cn=Nick Whyte,ou=users,dc=mydomain,dc=com')
+
         assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'] in groups
         assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'] in groups
 
