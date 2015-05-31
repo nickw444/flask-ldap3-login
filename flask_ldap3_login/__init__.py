@@ -71,6 +71,11 @@ class LDAP3LoginManager(object):
         '''
         
         app.ldap3_login_manager = self
+
+        servers = list(self._server_pool)
+        for s in servers:
+            self._server_pool.remove(s)
+
         self.init_config(app.config)
 
         if hasattr(app, 'teardown_appcontext'):
@@ -123,7 +128,6 @@ class LDAP3LoginManager(object):
         self.config.setdefault('LDAP_GROUP_OBJECT_FILTER', '(objectclass=group)')
         self.config.setdefault('LDAP_GROUP_MEMBERS_ATTR', 'uniqueMember')
         self.config.setdefault('LDAP_GET_GROUP_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
-        
 
         self.add_server(
             hostname=self.config.get('LDAP_HOST'),
