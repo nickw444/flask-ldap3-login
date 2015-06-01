@@ -408,4 +408,4 @@ class AppFactoryTestCase(BaseTestCase):
         """
         for i in range(10):
             self.manager.init_app(self.app)
-            self.assertIs(len(list(self.manager._server_pool)), 1)
+            self.assertEquals(len(list(self.manager._server_pool)), 1)
