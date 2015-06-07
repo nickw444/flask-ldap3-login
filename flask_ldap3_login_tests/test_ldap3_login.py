@@ -394,3 +394,18 @@ class SessionContextTextCase(BaseTestCase):
             self.assertFalse(hasattr(stack.top, 'ldap3_manager_connections'))
 
 
+class AppFactoryTestCase(BaseTestCase):
+    """
+    Tests whether the popular Flask app factory pattern can be used.
+    """
+
+    def test_server_pool(self):
+        """
+        To support the app factory pattern, the server pool must be reset when
+        init_app is called.
+        The test is executed 10 times because if you e.g. run unit tests you
+        likely reinitialize the app many times.
+        """
+        for i in range(10):
+            self.manager.init_app(self.app)
+            self.assertEquals(len(list(self.manager._server_pool)), 1)
