@@ -408,6 +408,9 @@ class LDAP3LoginManager(object):
 
         else:
             for user in connection.response:
+                if user['type'] != 'searchResEntry':
+                    continue
+
                 # Attempt to bind with each user we find until we can find 
                 # one that works.
                 user_connection = self._make_connection(

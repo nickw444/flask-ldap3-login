@@ -116,7 +116,10 @@ class Connection(mock.MagicMock):
                 return items
 
             items = recurse_search(scoped_directory)
-            items = [dict(attributes=user, dn=user['dn']) for user in items]
+            items = [
+                dict(attributes=user, dn=user['dn'], type='searchResEntry')
+                for user in items
+            ]
             self._result = len(items) > 0
             self._response = items
 
