@@ -103,12 +103,15 @@ class LDAP3LoginManager(object):
         self.config.setdefault('LDAP_USE_SSL', False)
         self.config.setdefault('LDAP_READONLY', True)
         self.config.setdefault('LDAP_BIND_DIRECT_CREDENTIALS', False)
+        self.config.setdefault('LDAP_BIND_DIRECT_SUFFIX', '')
+        self.config.setdefault('LDAP_BIND_DIRECT_GET_USER_INFO', True)
         self.config.setdefault('LDAP_ALWAYS_SEARCH_BIND', False)
         self.config.setdefault('LDAP_BASE_DN', '')
         self.config.setdefault('LDAP_BIND_USER_DN', None)
         self.config.setdefault('LDAP_BIND_USER_PASSWORD', None)
         self.config.setdefault('LDAP_SEARCH_FOR_GROUPS', True)
         self.config.setdefault('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND', False)
+
 
         # Prepended to the Base DN to limit scope when searching for Users/Groups.
         self.config.setdefault('LDAP_USER_DN', '')
@@ -261,7 +264,8 @@ class LDAP3LoginManager(object):
         successful. Do not use this method if you require more user info.
         
         Args:
-            username (str): fully qualified username for the user to bind with.
+            username (str): username for the user to bind with. LOGIN_SUFFIX 
+                            will be appended. 
             password (str): User's password to bind with.
 
         Returns:
@@ -269,7 +273,7 @@ class LDAP3LoginManager(object):
         """
 
         connection = self._make_connection(
-            bind_user=username, 
+            bind_user=username + self.config.get('LDAP_BIND_DIRECT_SUFFIX'),
             bind_password=password,
         )
 
@@ -279,6 +283,37 @@ class LDAP3LoginManager(object):
             response.status = AuthenticationResponseStatus.success
             response.user_id = username
             log.debug("Authentication was successful for user '{0}'".format(username))
+
+            if self.config.get('LDAP_BIND_DIRECT_GET_USER_INFO'):
+                # User wants extra info about the bind
+                user_filter = '({search_attr}={username})'.format(
+                    search_attr=self.config.get('LDAP_USER_LOGIN_ATTR'),
+                    username=username
+                )
+                search_filter = '(&{0}{1})'.format(
+                    self.config.get('LDAP_USER_OBJECT_FILTER'),
+                    user_filter,
+                )
+
+                connection.search(
+                    search_base=self.full_user_search_dn,
+                    search_filter=search_filter,
+                    search_scope=getattr(ldap3, self.config.get('LDAP_USER_SEARCH_SCOPE')),
+                    attributes=self.config.get('LDAP_GET_USER_ATTRIBUTES'),
+                )
+
+                if len(connection.response) == 0 or \
+                (self.config.get('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND')\
+                and len(connection.response) > 1):
+                    # Don't allow them to log in.
+                    log.error("Could not gather extra info for user '{0}'".format(username))
+                else:
+
+                    user = connection.response[0]
+                    user['attributes']['dn'] = user['dn']
+                    response.user_info = user['attributes']
+                    response.user_dn = user['dn']
+
 
         except ldap3.LDAPInvalidCredentialsResult as e:
             log.debug("Authentication was not successful for user '{0}'".format(username))
