@@ -12,6 +12,14 @@ version_path = os.path.join(os.path.dirname(
 )
 version = open(version_path).read()
 
+
+
+requires = ['ldap3' ,'Flask', 'Flask-wtf']
+try:
+  import enum
+except Exception as e:
+  requires.append('enum34')
+
 setup(
   name='flask-ldap3-login',
   version=version,
@@ -22,12 +30,7 @@ setup(
   long_description=long_description,
   url='https://github.com/nickw444/flask-ldap3-login',
   zip_safe=False,
-  install_requires=[
-        "ldap3",
-        "Flask",
-        "Flask-wtf",
-        "enum34"
-  ],
+  install_requires=requires,
   classifiers=[
     'Intended Audience :: Developers',
     'Programming Language :: Python',
