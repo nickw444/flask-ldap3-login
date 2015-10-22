@@ -53,8 +53,8 @@ class LDAP3LoginManager(object):
         self._server_pool = ldap3.ServerPool(
             [],
             ldap3.POOLING_STRATEGY_FIRST,
-            active=True, 
-            exhaust=True
+            active=1,   # Loop through all servers once. 
+            exhaust=10, # Remove unreachable servers for 10 seconds.
         )
 
         if app is not None:
