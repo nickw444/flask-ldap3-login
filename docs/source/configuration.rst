@@ -123,7 +123,7 @@ Filters/Searching
 
 ``LDAP_GROUP_OBJECT_FILTER``         Specifies what object filter to apply when 
                                      searching for groups. Defaults to 
-                                     ``'(objectclass=groupOfUniqueNames)'``
+                                     ``'(objectclass=group)'``
 
 ``LDAP_GROUP_MEMBERS_ATTR``          Specifies the LDAP attribute where group 
                                      members are declared. Defaults to 
