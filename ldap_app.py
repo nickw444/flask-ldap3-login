@@ -42,9 +42,6 @@ class User(UserMixin):
     def get_id(self):
         return self.dn
 
-    def is_anonymous(self):
-        return False
-
 
 # Declare a User Loader for Flask-Login.
 # Simply returns the User if it exists in our 'database', otherwise 
@@ -71,7 +68,7 @@ def save_user(dn, username, data, memberships):
 @app.route('/')
 def home():
     # Redirect users who are not logged in.
-    if not current_user or current_user.is_anonymous():
+    if not current_user or current_user.is_anonymous:
         return redirect(url_for('login'))
 
     # User is logged in, so show them a page with their cn and dn.
