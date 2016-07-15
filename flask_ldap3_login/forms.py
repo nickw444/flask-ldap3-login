@@ -1,9 +1,9 @@
-from flask.ext.wtf import Form
+from flask_wtf import Form
 import wtforms
 from wtforms import validators
 from flask import flash, current_app
 import ldap3
-from flask.ext.ldap3_login import AuthenticationResponseStatus
+from flask_ldap3_login import AuthenticationResponseStatus
 
 import logging
 log = logging.getLogger(__name__)
