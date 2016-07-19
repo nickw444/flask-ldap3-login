@@ -1,5 +1,5 @@
 import unittest
-import flask.ext.ldap3_login as ldap3_login
+import flask_ldap3_login as ldap3_login
 import flask 
 import mock
 from flask import abort
@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 from .Directory import DIRECTORY, get_directory_base
 from .MockTypes import Server, Connection, ServerPool
 
-from flask.ext.ldap3_login.forms import LDAPLoginForm
+from flask_ldap3_login.forms import LDAPLoginForm
 
 try:
     from flask import _app_ctx_stack as stack

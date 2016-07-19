@@ -2,7 +2,7 @@ from flask import Flask, url_for
 from flask_ldap3_login import LDAP3LoginManager
 from flask_login import LoginManager, login_user, UserMixin, current_user
 from flask import render_template_string, redirect
-from flask.ext.ldap3_login.forms import LDAPLoginForm
+from flask_ldap3_login.forms import LDAPLoginForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
