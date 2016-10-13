@@ -116,7 +116,7 @@ class Connection(mock.MagicMock):
                 return items
 
             items = recurse_search(scoped_directory)
-            items = [dict(attributes=user, dn=user['dn']) for user in items]
+            items = [dict(attributes=user, dn=user['dn'], type='searchResEntry') for user in items]
             self._result = len(items) > 0
             self._response = items
 
@@ -124,7 +124,7 @@ class Connection(mock.MagicMock):
 
         elif search_scope == ldap3.LEVEL:
             
-            matching = [dict(attributes=user, dn=user['dn']) for user in scoped_directory.values() if check_user(user)]
+            matching = [dict(attributes=user, dn=user['dn'], type='searchResEntry') for user in scoped_directory.values() if check_user(user)]
             self._result = len(matching) > 0
             self._response = matching
 

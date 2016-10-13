@@ -445,6 +445,11 @@ class LDAP3LoginManager(object):
             for user in connection.response:
                 # Attempt to bind with each user we find until we can find 
                 # one that works.
+
+                if 'type' not in user or user.get('type') != 'searchResEntry':
+                    # Issue #13 - Don't return non-entry results.
+                    continue
+
                 user_connection = self._make_connection(
                     bind_user=user['dn'],
                     bind_password=password
@@ -529,6 +534,10 @@ class LDAP3LoginManager(object):
 
         results = []
         for item in connection.response:
+            if 'type' not in item or item.get('type') != 'searchResEntry':
+                # Issue #13 - Don't return non-entry results.
+                continue
+            
             group_data = item['attributes']
             group_data['dn'] = item['dn']
             results.append(group_data)
