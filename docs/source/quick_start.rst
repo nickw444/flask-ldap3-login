@@ -2,7 +2,7 @@ Quick Start
 ==================================================
 
 Install the Package
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -10,7 +10,7 @@ Install the Package
 
 
 Basic Application
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 This is a basic application which uses Flask-Login to handle user sessions. 
 The application stores the users in the dictionary ``users``. 
@@ -19,7 +19,7 @@ The application stores the users in the dictionary ``users``.
 
 
 Basic Scripting Usage (Without a Flask App)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is an example for if you wish to simply use the module, maybe for testing or for use in some other environment.
 

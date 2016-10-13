@@ -53,5 +53,5 @@ setup(
         'Programming Language :: Python :: 2.6',
     ],
     test_suite="flask_ldap3_login_tests",
-    tests_require=['mock', 'sphinxcontrib-napoleon']
+    tests_require=['mock']
 )

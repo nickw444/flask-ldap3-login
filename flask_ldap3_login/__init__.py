@@ -401,11 +401,12 @@ class LDAP3LoginManager(object):
 
         Args:
             username (str): Username of the user to bind (the field specified
-                as LDAP_BIND_LOGIN_ATTR)
+                            as LDAP_BIND_LOGIN_ATTR)
             password (str): User's password to bind with when we find their dn.
 
         Returns:
             AuthenticationResponse
+
         """
         connection = self._make_connection(
             bind_user=self.config.get('LDAP_BIND_USER_DN'),

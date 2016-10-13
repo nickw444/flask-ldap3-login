@@ -423,7 +423,7 @@ class SessionContextTextCase(BaseTestCase):
                 self.assertEqual(len(stack.top.ldap3_manager_connections), 1)
                 # Raise an exception so teardown gets done
                 abort(404)
-        except Exception as e:
+        except Exception:
             pass
 
         with self.app.test_request_context():

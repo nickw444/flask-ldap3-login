@@ -4,7 +4,7 @@ Configuration
 The following configuration values are used by Flask-Security:
 
 Core
---------------
+----
 
 .. tabularcolumns:: |p{6.5cm}|p{8.5cm}|
 
@@ -91,7 +91,7 @@ Core
 
 
 Filters/Searching
---------------
+-----------------
 
 .. tabularcolumns:: |p{6.5cm}|p{8.5cm}|
 
