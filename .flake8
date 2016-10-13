@@ -1,0 +1,9 @@
+[flake8]
+ignore = E261
+exclude =
+   .git,
+   venv,
+   virtualenv,
+   docs,
+
+max-line-length = 90

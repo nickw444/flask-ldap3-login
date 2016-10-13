@@ -5,15 +5,24 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
-  # does not have headers provided, please ask https://launchpad.net/~pypy/+archive/ppa
-  # maintainers to fix their pypy-dev package.
   - "pypy"
-# command to install dependencies
+
 install:
+  - pip install coveralls flake8
   - pip install .
-  - pip install coveralls
-  - pip install mock
-# command to run tests
-script: coverage run --source=flask_ldap3_login setup.py test
+
+script: 
+  - flake8 .
+  - coverage run --source=flask_ldap3_login setup.py test
 
 after_success: coveralls
+
+before_deploy:
+  - git describe --dirty --always > VERSION
+
+deploy:
+  provider: pypi
+  user: nickw444-deploy
+  password: "$PYPI_PASSWORD"
+  on: 
+    tags: true
