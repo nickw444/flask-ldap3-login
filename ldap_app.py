@@ -10,25 +10,40 @@ app.config['DEBUG'] = True
 
 # Setup LDAP Configuration Variables. Change these to your own settings.
 # All configuration directives can be found in the documentation.
-app.config['LDAP_HOST'] = 'ad.mydomain.com'             # Hostname of your LDAP Server
-app.config['LDAP_BASE_DN'] = 'dc=mydomain,dc=com'       # Base DN of your directory
-app.config['LDAP_USER_DN'] = 'ou=users'                 # Users DN to be prepended to the Base DN
-app.config['LDAP_GROUP_DN'] = 'ou=groups'               # Groups DN to be prepended to the Base DN
 
-app.config['LDAP_USER_RDN_ATTR'] = 'cn'                 # The RDN attribute for your user schema on LDAP
-app.config['LDAP_USER_LOGIN_ATTR'] = 'mail'             # The Attribute you want users to authenticate to LDAP with.
-app.config['LDAP_BIND_USER_DN'] = None                  # The Username to bind to LDAP with
-app.config['LDAP_BIND_USER_PASSWORD'] = None            # The Password to bind to LDAP with
+# Hostname of your LDAP Server
+app.config['LDAP_HOST'] = 'ad.mydomain.com'
+
+# Base DN of your directory
+app.config['LDAP_BASE_DN'] = 'dc=mydomain,dc=com'
+
+# Users DN to be prepended to the Base DN
+app.config['LDAP_USER_DN'] = 'ou=users'
+
+# Groups DN to be prepended to the Base DN
+app.config['LDAP_GROUP_DN'] = 'ou=groups'
+
+# The RDN attribute for your user schema on LDAP
+app.config['LDAP_USER_RDN_ATTR'] = 'cn'
+
+# The Attribute you want users to authenticate to LDAP with.
+app.config['LDAP_USER_LOGIN_ATTR'] = 'mail'
+
+# The Username to bind to LDAP with
+app.config['LDAP_BIND_USER_DN'] = None
+
+# The Password to bind to LDAP with
+app.config['LDAP_BIND_USER_PASSWORD'] = None
 
 login_manager = LoginManager(app)              # Setup a Flask-Login Manager
 ldap_manager = LDAP3LoginManager(app)          # Setup a LDAP3 Login Manager.
 
 # Create a dictionary to store the users in when they authenticate
-# This example stores users in memory. 
+# This example stores users in memory.
 users = {}
 
 
-# Declare an Object Model for the user, and make it comply with the 
+# Declare an Object Model for the user, and make it comply with the
 # flask-login UserMixin mixin.
 class User(UserMixin):
     def __init__(self, dn, username, data):
@@ -44,7 +59,7 @@ class User(UserMixin):
 
 
 # Declare a User Loader for Flask-Login.
-# Simply returns the User if it exists in our 'database', otherwise 
+# Simply returns the User if it exists in our 'database', otherwise
 # returns None.
 @login_manager.user_loader
 def load_user(id):
@@ -63,8 +78,8 @@ def save_user(dn, username, data, memberships):
     users[dn] = user
     return user
 
-# Declare some routes for usage to show the authentication process.
 
+# Declare some routes for usage to show the authentication process.
 @app.route('/')
 def home():
     # Redirect users who are not logged in.
@@ -79,15 +94,17 @@ def home():
 
     return render_template_string(template)
 
+
 @app.route('/manual_login')
 def manual_login():
     # Instead of using the form, you can alternatively authenticate
     # using the authenticate method.
     # This WILL NOT fire the save_user() callback defined above.
     # You are responsible for saving your users.
-    app.ldap3_login_manager.authenticate('username','password')
+    app.ldap3_login_manager.authenticate('username', 'password')
 
-@app.route('/login', methods=['GET','POST'])
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     template = """
     {{ get_flashed_messages() }}
@@ -101,13 +118,13 @@ def login():
     """
 
     # Instantiate a LDAPLoginForm which has a validator to check if the user
-    # exists in LDAP. 
+    # exists in LDAP.
     form = LDAPLoginForm()
 
     if form.validate_on_submit():
         # Successfully logged in, We can now access the saved user object
-        # via form.user. 
-        login_user(form.user) # Tell flask-login to log them in.
+        # via form.user.
+        login_user(form.user)  # Tell flask-login to log them in.
         return redirect('/')  # Send them home
 
     return render_template_string(template, form=form)

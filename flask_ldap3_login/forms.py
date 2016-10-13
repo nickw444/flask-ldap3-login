@@ -1,21 +1,22 @@
 from flask_wtf import FlaskForm
 import wtforms
 from wtforms import validators
-from flask import flash, current_app
-import ldap3
+from flask import current_app
 from flask_ldap3_login import AuthenticationResponseStatus
 
 import logging
 log = logging.getLogger(__name__)
 
+
 class LDAPValidationError(validators.ValidationError):
     pass
+
 
 class LDAPLoginForm(FlaskForm):
     """
     A basic loginform which can be subclassed by your application.
-    Upon validation, the form will check against ldap for a valid 
-    username/password combination. 
+    Upon validation, the form will check against ldap for a valid
+    username/password combination.
 
     Once validiated will have a `form.user` object that contains
     a user object.
@@ -51,19 +52,18 @@ class LDAPLoginForm(FlaskForm):
             self.password.errors.append('Invalid Username/Password.')
             return False
 
-
     def validate(self, *args, **kwargs):
         """
         Validates the form by calling `validate` on each field, passing any
         extra `Form.validate_<fieldname>` validators to the field validator.
-        
-        also calls `validate_ldap` 
+
+        also calls `validate_ldap`
         """
 
         valid = FlaskForm.validate(self, *args, **kwargs)
-        if not valid: 
-            logging.debug("Form validation failed before we had a change to "\
-                "check ldap. Reasons: '{0}'".format(self.errors))
+        if not valid:
+            logging.debug("Form validation failed before we had a change to "
+                          "check ldap. Reasons: '{0}'".format(self.errors))
             return valid
 
         return self.validate_ldap()

@@ -56,6 +56,7 @@ DIRECTORY = {
     }
 }
 
+
 def get_directory_base_recurse(location, directory):
     if location[0] not in directory:
         return None
@@ -63,6 +64,7 @@ def get_directory_base_recurse(location, directory):
     if len(location) == 1:
         return item
     return get_directory_base_recurse(location[1:], item)
+
 
 def get_directory_base(dn):
     location = list(reversed(dn.split(',')))
