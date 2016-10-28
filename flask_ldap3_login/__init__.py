@@ -52,7 +52,7 @@ class LDAP3LoginManager(object):
         self.config = {}
         self._server_pool = ldap3.ServerPool(
             [],
-            ldap3.POOLING_STRATEGY_FIRST,
+            ldap3.FIRST,
             active=1,   # Loop through all servers once.
             exhaust=10,  # Remove unreachable servers for 10 seconds.
         )
@@ -115,11 +115,11 @@ class LDAP3LoginManager(object):
         self.config.setdefault('LDAP_USER_DN', '')
         self.config.setdefault('LDAP_GROUP_DN', '')
 
-        self.config.setdefault('LDAP_BIND_AUTHENTICATION_TYPE', 'AUTH_SIMPLE')
+        self.config.setdefault('LDAP_BIND_AUTHENTICATION_TYPE', 'SIMPLE')
 
         # Ldap Filters
         self.config.setdefault('LDAP_USER_SEARCH_SCOPE',
-                               'SEARCH_SCOPE_SINGLE_LEVEL')
+                               'LEVEL')
         self.config.setdefault('LDAP_USER_OBJECT_FILTER',
                                '(objectclass=person)')
         self.config.setdefault('LDAP_USER_LOGIN_ATTR', 'uid')
@@ -128,7 +128,7 @@ class LDAP3LoginManager(object):
             'LDAP_GET_USER_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
 
         self.config.setdefault('LDAP_GROUP_SEARCH_SCOPE',
-                               'SEARCH_SCOPE_SINGLE_LEVEL')
+                               'LEVEL')
         self.config.setdefault(
             'LDAP_GROUP_OBJECT_FILTER', '(objectclass=group)')
         self.config.setdefault('LDAP_GROUP_MEMBERS_ATTR', 'uniqueMember')
@@ -325,7 +325,7 @@ class LDAP3LoginManager(object):
                     response.user_info = user['attributes']
                     response.user_dn = user['dn']
 
-        except ldap3.LDAPInvalidCredentialsResult as e:
+        except ldap3.core.exceptions.LDAPInvalidCredentialsResult as e:
             log.debug(
                 "Authentication was not successful for user '{0}'".format(username))
             response.status = AuthenticationResponseStatus.fail
@@ -380,7 +380,7 @@ class LDAP3LoginManager(object):
                 response.user_groups = self.get_user_groups(
                     dn=bind_user, _connection=connection)
 
-        except ldap3.LDAPInvalidCredentialsResult as e:
+        except ldap3.core.exceptions.LDAPInvalidCredentialsResult as e:
             log.debug(
                 "Authentication was not successful for user '{0}'".format(username))
             response.status = AuthenticationResponseStatus.fail
@@ -491,7 +491,7 @@ class LDAP3LoginManager(object):
                     self.destroy_connection(user_connection)
                     break
 
-                except ldap3.LDAPInvalidCredentialsResult as e:
+                except ldap3.core.exceptions.LDAPInvalidCredentialsResult as e:
                     log.debug(
                         "Authentication was not successful for "
                         "user '{0}'".format(username))
@@ -751,7 +751,7 @@ class LDAP3LoginManager(object):
                 upon bind if you use this internal method.
         """
 
-        authentication = ldap3.AUTH_ANONYMOUS
+        authentication = ldap3.ANONYMOUS
         if bind_user:
             authentication = getattr(ldap3, self.config.get(
                 'LDAP_BIND_AUTHENTICATION_TYPE'))
@@ -763,7 +763,7 @@ class LDAP3LoginManager(object):
             read_only=self.config.get('LDAP_READONLY'),
             user=bind_user,
             password=bind_password,
-            client_strategy=ldap3.STRATEGY_SYNC,
+            client_strategy=ldap3.SYNC,
             authentication=authentication,
             check_names=True,
             raise_exceptions=True,

@@ -23,7 +23,7 @@ try:
 except Exception as e:
     version = '0.0.0-dev'
 
-requires = ['ldap3', 'Flask', 'Flask-wtf']
+requires = ['ldap3>=2.0.7', 'Flask', 'Flask-wtf']
 
 try:
     import enum  # noqa

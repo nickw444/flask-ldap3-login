@@ -98,7 +98,7 @@ Filters/Searching
 ==================================== ================================================
 ``LDAP_USER_SEARCH_SCOPE``           Specifies what scope to search in when
                                      searching for a specific user. Defaults to
-                                     ``'SEARCH_SCOPE_SINGLE_LEVEL'``. 
+                                     ``'LEVEL'``.
 
 ``LDAP_USER_OBJECT_FILTER``          Specifies what object filter to apply when 
                                      searching for users. Defaults to 
@@ -119,7 +119,7 @@ Filters/Searching
 
 ``LDAP_GROUP_SEARCH_SCOPE``          Specifies what scope to search in when
                                      searching for a specific group. Defaults to
-                                     ``'SEARCH_SCOPE_SINGLE_LEVEL'``. 
+                                     ``'LEVEL'``.
 
 ``LDAP_GROUP_OBJECT_FILTER``         Specifies what object filter to apply when 
                                      searching for groups. Defaults to 

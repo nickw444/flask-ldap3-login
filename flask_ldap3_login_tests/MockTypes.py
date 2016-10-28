@@ -75,7 +75,7 @@ class Connection(mock.MagicMock):
 
     def bind(self):
         if not self.server or self.server.servers[0].host != 'ad.mydomain.com':
-            raise ldap3.LDAPBindError
+            raise ldap3.core.exceptions.LDAPBindError
 
         if self.user:
             # Validate the bind user.
@@ -84,7 +84,7 @@ class Connection(mock.MagicMock):
             if bind_user and self.password == bind_user['password']:
                 return True
 
-            raise ldap3.LDAPInvalidCredentialsResult
+            raise ldap3.core.exceptions.LDAPInvalidCredentialsResult
         else:
             return True
 
