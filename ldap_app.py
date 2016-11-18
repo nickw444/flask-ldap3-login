@@ -129,5 +129,6 @@ def login():
 
     return render_template_string(template, form=form)
 
+
 if __name__ == '__main__':
     app.run()
