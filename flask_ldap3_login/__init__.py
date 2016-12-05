@@ -159,7 +159,12 @@ class LDAP3LoginManager(object):
         """
         if not use_ssl and tls_ctx:
             raise ValueError("Cannot specify a TLS context and not use SSL!")
-        server = ldap3.Server(hostname, port=port, use_ssl=use_ssl, tls=tls_ctx)
+        server = ldap3.Server(
+            hostname,
+            port=port,
+            use_ssl=use_ssl,
+            tls=tls_ctx
+        )
         self._server_pool.add(server)
         return server
 
