@@ -134,12 +134,13 @@ class LDAP3LoginManager(object):
         self.config.setdefault('LDAP_GROUP_MEMBERS_ATTR', 'uniqueMember')
         self.config.setdefault(
             'LDAP_GET_GROUP_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
+        self.config.setdefault('LDAP_ADD_SERVER', True)
 
-        if self.config.setdefault('LDAP_ADD_SERVER', True):
+        if self.config['LDAP_ADD_SERVER']:
             self.add_server(
-                hostname=self.config.get('LDAP_HOST'),
-                port=self.config.get('LDAP_PORT'),
-                use_ssl=self.config.get('LDAP_USE_SSL')
+                hostname=self.config['LDAP_HOST'],
+                port=self.config['LDAP_PORT'],
+                use_ssl=self.config['LDAP_USE_SSL']
             )
 
     def add_server(self, hostname, port, use_ssl, tls_ctx=None):

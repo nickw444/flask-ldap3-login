@@ -60,7 +60,12 @@ def build_comparison(cmp_string):
 
 
 class Server(mock.MagicMock):
-    pass
+    def __init__(self, hostname, port=None, use_ssl=None, tls=None):
+        mock.MagicMock.__init__(self)
+        self.hostname = hostname
+        self.port = port
+        self.use_ssl = use_ssl
+        self.tls = tls
 
 
 class Connection(mock.MagicMock):
@@ -152,4 +157,10 @@ class Connection(mock.MagicMock):
 
 
 class ServerPool(mock.MagicMock):
-    pass
+    def __init__(self, servers, *args, **kwargs):
+        mock.MagicMock.__init__(self)
+        self.servers = servers
+
+    def add(self, server):
+        self.servers.append(server)
+
