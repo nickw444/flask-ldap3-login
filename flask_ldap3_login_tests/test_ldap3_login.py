@@ -447,7 +447,7 @@ class AppFactoryTestCase(BaseTestCase):
         """
         for i in range(10):
             self.manager.init_app(self.app)
-            self.assertEquals(len(list(self.manager._server_pool)), 1)
+            self.assertEqual(len(list(self.manager._server_pool)), 1)
 
 
 class LDAPAddServerConfigTestCase(unittest.TestCase):
@@ -473,7 +473,7 @@ class LDAPAddServerConfigTestCase(unittest.TestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_config(config)
 
-        self.assertEquals(len(list(ldap3_manager._server_pool)), 1)
+        self.assertEqual(len(list(ldap3_manager._server_pool)), 1)
 
     def test_server_added_when_true(self):
         """
@@ -485,7 +485,7 @@ class LDAPAddServerConfigTestCase(unittest.TestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_config(config)
 
-        self.assertEquals(len(list(ldap3_manager._server_pool)), 1)
+        self.assertEqual(len(list(ldap3_manager._server_pool)), 1)
 
     def test_server_added_when_false(self):
         """
@@ -497,7 +497,7 @@ class LDAPAddServerConfigTestCase(unittest.TestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_config(config)
 
-        self.assertEquals(len(list(ldap3_manager._server_pool)), 0)
+        self.assertEqual(len(list(ldap3_manager._server_pool)), 0)
 
 
 class AddServerTestCase(unittest.TestCase):
