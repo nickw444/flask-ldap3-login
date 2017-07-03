@@ -134,14 +134,16 @@ class LDAP3LoginManager(object):
         self.config.setdefault('LDAP_GROUP_MEMBERS_ATTR', 'uniqueMember')
         self.config.setdefault(
             'LDAP_GET_GROUP_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
+        self.config.setdefault('LDAP_ADD_SERVER', True)
 
-        self.add_server(
-            hostname=self.config.get('LDAP_HOST'),
-            port=self.config.get('LDAP_PORT'),
-            use_ssl=self.config.get('LDAP_USE_SSL')
-        )
+        if self.config['LDAP_ADD_SERVER']:
+            self.add_server(
+                hostname=self.config['LDAP_HOST'],
+                port=self.config['LDAP_PORT'],
+                use_ssl=self.config['LDAP_USE_SSL']
+            )
 
-    def add_server(self, hostname, port, use_ssl):
+    def add_server(self, hostname, port, use_ssl, tls_ctx=None):
         """
         Add an additional server to the server pool and return the
         freshly created server.
@@ -150,11 +152,20 @@ class LDAP3LoginManager(object):
             hostname (str): Hostname of the server
             port (int): Port of the server
             use_ssl (bool): True if SSL is to be used when connecting.
+            tls_ctx (ldap3.Tls): An optional TLS context object to use
+                when connecting.
 
         Returns:
             ldap3.Server: The freshly created server object.
         """
-        server = ldap3.Server(hostname, port=port, use_ssl=use_ssl)
+        if not use_ssl and tls_ctx:
+            raise ValueError("Cannot specify a TLS context and not use SSL!")
+        server = ldap3.Server(
+            hostname,
+            port=port,
+            use_ssl=use_ssl,
+            tls=tls_ctx
+        )
         self._server_pool.add(server)
         return server
 

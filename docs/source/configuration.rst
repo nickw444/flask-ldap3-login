@@ -21,9 +21,17 @@ Core
 ``LDAP_USE_SSL``                         Specifies whether the default server
                                          connection should use SSL. Defaults to
                                          ``False``.
+
+``LDAP_ADD_SERVER``                      Specifies whether the default server
+                                         as specified in ``LDAP_HOST`` should be
+                                         added to the server pool. Defaults to
+                                         ``True``. Servers can be added via the
+                                         ``add_server`` method.
+
 ``LDAP_READONLY``                        Specified if connections made to the 
                                          server are readonly. Defaults to 
                                          ``True``
+
 ``LDAP_BIND_DIRECT_CREDENTIALS``         Instead of searching for a DN of a user
                                          you can instead bind directly to the
                                          directory. Setting this ``True`` will 
@@ -38,6 +46,7 @@ Core
                                          up their user info. You will only know
                                          if their credentials are correct or
                                          not. Defaults to ``False``.
+
 ``LDAP_ALWAYS_SEARCH_BIND``              Specifies whether or not the library
                                          should perform direct binds. When the 
                                          RDN attribute is the same as the login
@@ -85,7 +94,6 @@ Core
 ``LDAP_BIND_AUTHENTICATION_TYPE``        Specifies the LDAP bind type to use
                                          when binding to LDAP. Defaults to 
                                          ``'AUTH_SIMPLE'``
-
 
 ======================================== =======================================
 
