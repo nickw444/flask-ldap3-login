@@ -526,7 +526,8 @@ class AddServerTestCase(unittest.TestCase):
         ldap3_manager.init_config(AddServerTestCase.DEFAULT_CONFIG)
 
         def add_server():
-            return ldap3_manager.add_server("ad2.mydomain.com", 389, use_ssl=False, tls_ctx=object())
+            return ldap3_manager.add_server("ad2.mydomain.com", 389,
+                                            use_ssl=False, tls_ctx=object())
 
         self.assertRaises(ValueError, add_server)
 
@@ -556,7 +557,8 @@ class AddServerTestCase(unittest.TestCase):
         """
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_config(AddServerTestCase.DEFAULT_CONFIG)
-        ldap3_manager.add_server("ad2.mydomain.com", 389, use_ssl=True, tls_ctx=None)
+        ldap3_manager.add_server("ad2.mydomain.com", 389,
+                                 use_ssl=True, tls_ctx=None)
 
         self.assertEqual(len(ldap3_manager._server_pool.servers), 1)
 
@@ -575,11 +577,11 @@ class AddServerTestCase(unittest.TestCase):
 
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_config(AddServerTestCase.DEFAULT_CONFIG)
-        ldap3_manager.add_server("ad2.mydomain.com", 389, use_ssl=True, tls_ctx=fake_tls_ctx)
+        ldap3_manager.add_server("ad2.mydomain.com", 389,
+                                 use_ssl=True, tls_ctx=fake_tls_ctx)
 
         self.assertEqual(len(ldap3_manager._server_pool.servers), 1)
 
         server = ldap3_manager._server_pool.servers[-1]
         self.assertEqual(server.tls, fake_tls_ctx)
         self.assertTrue(server.use_ssl)
-

@@ -163,4 +163,3 @@ class ServerPool(mock.MagicMock):
 
     def add(self, server):
         self.servers.append(server)
-
