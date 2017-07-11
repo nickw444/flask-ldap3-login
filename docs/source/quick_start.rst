@@ -32,4 +32,4 @@ Custom TLS Context
 This is an example that shows how to initialize a custom TLS context for
 securing communication between the module and a secure LDAP (LDAPS server.
 
-.. literalinclude:: ../../ldap_noapp.py
+.. literalinclude:: ../../ldap_noapp_tls.py
