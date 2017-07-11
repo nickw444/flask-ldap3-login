@@ -110,7 +110,7 @@ Filters/Searching
 
 ``LDAP_USER_OBJECT_FILTER``          Specifies what object filter to apply when 
                                      searching for users. Defaults to 
-                                     ``'(objectclass=inetorgperson)'``
+                                     ``'(objectclass=person)'``
 
 ``LDAP_USER_LOGIN_ATTR``             Declares what ldap attribute corresponds to
                                      the username passed to any login method 
