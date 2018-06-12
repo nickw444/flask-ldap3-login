@@ -101,6 +101,7 @@ class LDAP3LoginManager(object):
         self.config.setdefault('LDAP_USE_SSL', False)
         self.config.setdefault('LDAP_READONLY', True)
         self.config.setdefault('LDAP_BIND_DIRECT_CREDENTIALS', False)
+        self.config.setdefault('LDAP_BIND_DIRECT_PREFIX', '')
         self.config.setdefault('LDAP_BIND_DIRECT_SUFFIX', '')
         self.config.setdefault('LDAP_BIND_DIRECT_GET_USER_INFO', True)
         self.config.setdefault('LDAP_ALWAYS_SEARCH_BIND', False)
@@ -283,16 +284,19 @@ class LDAP3LoginManager(object):
         successful. Do not use this method if you require more user info.
 
         Args:
-            username (str): username for the user to bind with. LOGIN_SUFFIX
-                            will be appended.
+            username (str): username for the user to bind with. LOGIN_PREFIX
+                            will be prepended and LOGIN_SUFFIX will be appended.
             password (str): User's password to bind with.
 
         Returns:
             AuthenticationResponse
         """
 
+        bind_username = (self.config.get('LDAP_BIND_DIRECT_PREFIX')
+                        + username
+                        + self.config.get('LDAP_BIND_DIRECT_SUFFIX'))
         connection = self._make_connection(
-            bind_user=username + self.config.get('LDAP_BIND_DIRECT_SUFFIX'),
+            bind_user=bind_username,
             bind_password=password,
         )
 
