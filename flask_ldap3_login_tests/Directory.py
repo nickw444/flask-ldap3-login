@@ -29,6 +29,16 @@ DIRECTORY = {
                     'dn': 'cn=Fake User,ou=users,dc=mydomain,dc=com',
                     'password': 'fake321',
                 },
+                'cn=Prefix Fake User': {
+                    'cn': ['Prefix Fake User'],
+                    'mail': ['fake@nickwhyte.com'],
+                    'website': ['http://www.nickwhyte.com'],
+                    'sn': ['User'],
+                    'givenname': ['Fake'],
+                    'objectclass': ['person'],
+                    'dn': 'cn=Fake User,ou=users,dc=mydomain,dc=com',
+                    'password': 'fake321',
+                },
 
             },
             'ou=groups': {
