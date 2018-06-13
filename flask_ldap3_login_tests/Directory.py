@@ -60,6 +60,7 @@ BIND_DIRECT_USERS = {
     'janecitizen@mycooldomain.com': 'fake321',
 }
 
+
 def get_directory_base_recurse(location, directory):
     if location[0] not in directory:
         return None
