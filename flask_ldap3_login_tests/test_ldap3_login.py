@@ -100,6 +100,52 @@ class AuthenticateDirectTestCase(BaseTestCase):
 @mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
+class DirectBindPrefixTestCase(BaseTestCase):
+    def setUp(self):
+        super(DirectBindPrefixTestCase, self).setUp()
+
+        self.manager.config.update({
+            'LDAP_USER_RDN_ATTR': 'cn',
+            'LDAP_USER_LOGIN_ATTR': 'cn',
+            'LDAP_BIND_DIRECT_CREDENTIALS': True,
+            'LDAP_BIND_DIRECT_PREFIX': 'MY_COOL_DOMAIN\\',
+        })
+
+    def test_login(self):
+        r = self.manager.authenticate('janecitizen', 'fake321')
+        self.assertEqual(
+            r.status, ldap3_login.AuthenticationResponseStatus.success)
+        r = self.manager.authenticate('janecitizen', 'fake3210')
+        self.assertEqual(
+            r.status, ldap3_login.AuthenticationResponseStatus.fail)
+
+
+@mock.patch('ldap3.ServerPool', new=ServerPool)
+@mock.patch('ldap3.Server', new=Server)
+@mock.patch('ldap3.Connection', new=Connection)
+class DirectBindSuffixTestCase(BaseTestCase):
+    def setUp(self):
+        super(DirectBindSuffixTestCase, self).setUp()
+
+        self.manager.config.update({
+            'LDAP_USER_RDN_ATTR': 'cn',
+            'LDAP_USER_LOGIN_ATTR': 'cn',
+            'LDAP_BIND_DIRECT_CREDENTIALS': True,
+            'LDAP_BIND_DIRECT_SUFFIX': '@mycooldomain.com',
+        })
+
+    def test_login(self):
+        r = self.manager.authenticate('janecitizen', 'fake321')
+        self.assertEqual(
+            r.status, ldap3_login.AuthenticationResponseStatus.success)
+        r = self.manager.authenticate('janecitizen', 'fake3210')
+        self.assertEqual(
+            r.status, ldap3_login.AuthenticationResponseStatus.fail)
+
+
+@mock.patch('ldap3.ServerPool', new=ServerPool)
+@mock.patch('ldap3.Server', new=Server)
+@mock.patch('ldap3.Connection', new=Connection)
 class EmptyUserGroupDNTestCase(BaseTestCase):
     def setUp(self):
         super(EmptyUserGroupDNTestCase, self).setUp()

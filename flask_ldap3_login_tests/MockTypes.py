@@ -1,5 +1,5 @@
 import mock
-from .Directory import get_directory_base
+from .Directory import get_directory_base, BIND_DIRECT_USERS
 import ldap3
 import logging
 import re
@@ -83,6 +83,12 @@ class Connection(mock.MagicMock):
             raise ldap3.core.exceptions.LDAPBindError
 
         if self.user:
+            if self.user in BIND_DIRECT_USERS:
+                if BIND_DIRECT_USERS[self.user] == self.password:
+                    return True
+
+                raise ldap3.core.exceptions.LDAPInvalidCredentialsResult
+
             # Validate the bind user.
             bind_user = get_directory_base(self.user)
 

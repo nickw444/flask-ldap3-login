@@ -1,7 +1,7 @@
 Configuration
 =============
 
-The following configuration values are used by Flask-Security:
+The following configuration values are used by Flask-LDAP3-Login:
 
 Core
 ----
@@ -28,7 +28,7 @@ Core
                                          ``True``. Servers can be added via the
                                          ``add_server`` method.
 
-``LDAP_READONLY``                        Specified if connections made to the 
+``LDAP_READONLY``                        Specifies if connections made to the 
                                          server are readonly. Defaults to 
                                          ``True``
 
@@ -46,6 +46,14 @@ Core
                                          up their user info. You will only know
                                          if their credentials are correct or
                                          not. Defaults to ``False``.
+
+``LDAP_BIND_DIRECT_PREFIX``              Specifies a prefix to be added to the
+                                         username when making a direct bind.
+                                         Defaults to ``''``.
+
+``LDAP_BIND_DIRECT_SUFFIX``              Specifies a suffix to be added to the
+                                         username when making a direct bind.
+                                         Defaults to ``''``.
 
 ``LDAP_ALWAYS_SEARCH_BIND``              Specifies whether or not the library
                                          should perform direct binds. When the 

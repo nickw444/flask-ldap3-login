@@ -29,7 +29,6 @@ DIRECTORY = {
                     'dn': 'cn=Fake User,ou=users,dc=mydomain,dc=com',
                     'password': 'fake321',
                 },
-
             },
             'ou=groups': {
                 'cn=Staff': {
@@ -54,6 +53,11 @@ DIRECTORY = {
             }
         }
     }
+}
+
+BIND_DIRECT_USERS = {
+    'MY_COOL_DOMAIN\\janecitizen': 'fake321',
+    'janecitizen@mycooldomain.com': 'fake321',
 }
 
 
