@@ -18,10 +18,11 @@ script:
 after_success: coveralls
 
 before_deploy:
-  - git describe --dirty --always > VERSION
+  - git describe --tags > VERSION
 
 deploy:
   provider: pypi
+  skip_cleanup: true
   user: nickw444-deploy
   password: "$PYPI_PASSWORD"
   on: 
