@@ -108,7 +108,7 @@ class DirectBindPrefixSuffixTestCase(BaseTestCase):
         app.config['LDAP_USER_DN'] = 'ou=users'
         app.config['LDAP_GROUP_DN'] = 'ou=groups'
         app.config['LDAP_BIND_USER_DN'] = 'cn=Bind,dc=mydomain,dc=com'
-        app.config['LDAP_BIND_DIRECT_PREFIX'] = 'Prefix'
+        app.config['LDAP_BIND_DIRECT_PREFIX'] = 'Prefix '
         app.config['LDAP_BIND_DIRECT_SUFFIX'] = ''
         app.config['LDAP_BIND_USER_PASSWORD'] = 'bind123'
         app.config['LDAP_USER_RDN_ATTR'] = 'uid'
