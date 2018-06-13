@@ -100,6 +100,44 @@ class AuthenticateDirectTestCase(BaseTestCase):
 @mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
+class DirectBindPrefixSuffixTestCase(BaseTestCase):
+    def setUp(self):
+        app = flask.Flask(__name__)
+        app.config['LDAP_HOST'] = 'ad2.mydomain.com'
+        app.config['LDAP_BASE_DN'] = 'dc=mydomain,dc=com'
+        app.config['LDAP_USER_DN'] = 'ou=users'
+        app.config['LDAP_GROUP_DN'] = 'ou=groups'
+        app.config['LDAP_BIND_USER_DN'] = 'cn=Bind,dc=mydomain,dc=com'
+        app.config['LDAP_BIND_DIRECT_PREFIX'] = 'Prefix'
+        app.config['LDAP_BIND_DIRECT_SUFFIX'] = ''
+        app.config['LDAP_BIND_USER_PASSWORD'] = 'bind123'
+        app.config['LDAP_USER_RDN_ATTR'] = 'uid'
+        app.config['LDAP_USER_LOGIN_ATTR'] = 'mail'
+        app.config['SECRET_KEY'] = 'secrets'
+        app.config['WTF_CSRF_ENABLED'] = False
+
+        self.app = app
+        ldap3_manager = ldap3_login.LDAP3LoginManager(app)
+        self.manager = ldap3_manager
+
+        self.manager.config.update({
+            'LDAP_USER_RDN_ATTR': 'cn',
+            'LDAP_USER_LOGIN_ATTR': 'cn',
+            'LDAP_HOST': 'ad2.mydomain.com',
+        })
+
+    def test_login(self):
+        r = self.manager.authenticate('Fake User', 'fake321')
+        self.assertEqual(
+            r.status, ldap3_login.AuthenticationResponseStatus.success)
+        r = self.manager.authenticate('Fake User', 'fake3210')
+        self.assertEqual(
+            r.status, ldap3_login.AuthenticationResponseStatus.fail)
+
+
+@mock.patch('ldap3.ServerPool', new=ServerPool)
+@mock.patch('ldap3.Server', new=Server)
+@mock.patch('ldap3.Connection', new=Connection)
 class EmptyUserGroupDNTestCase(BaseTestCase):
     def setUp(self):
         super(EmptyUserGroupDNTestCase, self).setUp()
