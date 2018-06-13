@@ -29,17 +29,6 @@ DIRECTORY = {
                     'dn': 'cn=Fake User,ou=users,dc=mydomain,dc=com',
                     'password': 'fake321',
                 },
-                'cn=Prefix Fake User': {
-                    'cn': ['Prefix Fake User'],
-                    'mail': ['fake@nickwhyte.com'],
-                    'website': ['http://www.nickwhyte.com'],
-                    'sn': ['User'],
-                    'givenname': ['Fake'],
-                    'objectclass': ['person'],
-                    'dn': 'cn=Fake User,ou=users,dc=mydomain,dc=com',
-                    'password': 'fake321',
-                },
-
             },
             'ou=groups': {
                 'cn=Staff': {
@@ -66,6 +55,10 @@ DIRECTORY = {
     }
 }
 
+BIND_DIRECT_USERS = {
+    'MY_COOL_DOMAIN\\janecitizen': 'fake321',
+    'janecitizen@mycooldomain.com': 'fake321',
+}
 
 def get_directory_base_recurse(location, directory):
     if location[0] not in directory:
