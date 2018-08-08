@@ -114,7 +114,10 @@ Filters/Searching
 ==================================== ================================================
 ``LDAP_USER_SEARCH_SCOPE``           Specifies what scope to search in when
                                      searching for a specific user. Defaults to
-                                     ``'LEVEL'``.
+                                     ``'LEVEL'``, which limits search results to
+                                     objects in the root of your search base.
+                                     Use ``'SUBTREE'`` to do a recursive search
+                                     within the search base.
 
 ``LDAP_USER_OBJECT_FILTER``          Specifies what object filter to apply when 
                                      searching for users. Defaults to 
@@ -135,7 +138,10 @@ Filters/Searching
 
 ``LDAP_GROUP_SEARCH_SCOPE``          Specifies what scope to search in when
                                      searching for a specific group. Defaults to
-                                     ``'LEVEL'``.
+                                     ``'LEVEL'``, which limits search results to
+                                     objects in the root of your search base.
+                                     Use ``'SUBTREE'`` to do a recursive search
+                                     within the search base.
 
 ``LDAP_GROUP_OBJECT_FILTER``         Specifies what object filter to apply when 
                                      searching for groups. Defaults to 
