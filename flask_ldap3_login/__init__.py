@@ -549,10 +549,11 @@ class LDAP3LoginManager(object):
             )
             connection.bind()
 
+        safe_dn = ldap3.utils.conv.escape_filter_chars(dn)
         search_filter = '(&{group_filter}({members_attr}={user_dn}))'.format(
             group_filter=self.config.get('LDAP_GROUP_OBJECT_FILTER'),
             members_attr=self.config.get('LDAP_GROUP_MEMBERS_ATTR'),
-            user_dn=dn
+            user_dn=safe_dn
         )
 
         log.debug("Searching for groups for specific user with filter '{0}' "
