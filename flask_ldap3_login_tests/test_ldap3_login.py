@@ -426,6 +426,20 @@ class GetUserInfoTestCase(BaseTestCase):
 @mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
+class SpecialCharactersTestCase(BaseTestCase):
+    def test_get_user_groups_special_characters(self):
+        groups = self.manager.get_user_groups(
+            dn='cn=Jane (admin),ou=users,dc=mydomain,dc=com')
+
+        assert DIRECTORY['dc=com']['dc=mydomain'][
+                   'ou=groups']['cn=Staff'] not in groups
+        assert DIRECTORY['dc=com']['dc=mydomain'][
+                   'ou=groups']['cn=Admins'] in groups
+
+
+@mock.patch('ldap3.ServerPool', new=ServerPool)
+@mock.patch('ldap3.Server', new=Server)
+@mock.patch('ldap3.Connection', new=Connection)
 class GroupExistsTestCase(BaseTestCase):
     def setUp(self):
         super(GroupExistsTestCase, self).setUp()

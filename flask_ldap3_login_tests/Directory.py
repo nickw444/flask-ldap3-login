@@ -1,3 +1,5 @@
+import ldap3
+
 DIRECTORY = {
     'dc=com': {
         'dc=mydomain': {
@@ -29,6 +31,16 @@ DIRECTORY = {
                     'dn': 'cn=Fake User,ou=users,dc=mydomain,dc=com',
                     'password': 'fake321',
                 },
+                ldap3.utils.conv.escape_filter_chars('cn=Jane (admin)'): {
+                    'cn': ['Jane Citizen'],
+                    'mail': ['jane@jane.com'],
+                    'website': ['http://www.janecitizen.com'],
+                    'sn': ['Citizen'],
+                    'givenname': ['Jane'],
+                    'objectclass': ['person'],
+                    'dn': ldap3.utils.conv.escape_filter_chars('cn=Jane (admin),ou=users,dc=mydomain,dc=com'),
+                    'password': 'fake123'
+                },
             },
             'ou=groups': {
                 'cn=Staff': {
@@ -46,6 +58,7 @@ DIRECTORY = {
                     'description': ['A Group for Admins'],
                     'uniqueMember': [
                         'cn=Nick Whyte,ou=users,dc=mydomain,dc=com',
+                        ldap3.utils.conv.escape_filter_chars('cn=Jane (admin),ou=users,dc=mydomain,dc=com'),
                     ],
                     'objectclass': ['group'],
                     'dn': 'cn=Admins,ou=groups,dc=mydomain,dc=com',
