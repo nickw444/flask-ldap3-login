@@ -431,10 +431,8 @@ class SpecialCharactersTestCase(BaseTestCase):
         groups = self.manager.get_user_groups(
             dn='cn=Jane (admin),ou=users,dc=mydomain,dc=com')
 
-        assert DIRECTORY['dc=com']['dc=mydomain'][
-                   'ou=groups']['cn=Staff'] not in groups
-        assert DIRECTORY['dc=com']['dc=mydomain'][
-                   'ou=groups']['cn=Admins'] in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'] not in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'] in groups
 
 
 @mock.patch('ldap3.ServerPool', new=ServerPool)

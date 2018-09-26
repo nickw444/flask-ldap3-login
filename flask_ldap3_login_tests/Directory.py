@@ -38,7 +38,8 @@ DIRECTORY = {
                     'sn': ['Citizen'],
                     'givenname': ['Jane'],
                     'objectclass': ['person'],
-                    'dn': ldap3.utils.conv.escape_filter_chars('cn=Jane (admin),ou=users,dc=mydomain,dc=com'),
+                    'dn': ldap3.utils.conv.escape_filter_chars(
+                        'cn=Jane (admin),ou=users,dc=mydomain,dc=com'),
                     'password': 'fake123'
                 },
             },
@@ -58,7 +59,8 @@ DIRECTORY = {
                     'description': ['A Group for Admins'],
                     'uniqueMember': [
                         'cn=Nick Whyte,ou=users,dc=mydomain,dc=com',
-                        ldap3.utils.conv.escape_filter_chars('cn=Jane (admin),ou=users,dc=mydomain,dc=com'),
+                        ldap3.utils.conv.escape_filter_chars(
+                            'cn=Jane (admin),ou=users,dc=mydomain,dc=com'),
                     ],
                     'objectclass': ['group'],
                     'dn': 'cn=Admins,ou=groups,dc=mydomain,dc=com',
