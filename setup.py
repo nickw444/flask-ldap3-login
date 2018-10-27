@@ -20,14 +20,14 @@ long_description = open(readme_path).read()
 
 try:
     version = get_version()
-except Exception as e:
+except Exception:
     version = '0.0.0-dev'
 
 requires = ['ldap3>=2.0.7', 'Flask', 'Flask-wtf']
 
 try:
     import enum  # noqa
-except Exception as e:
+except Exception:
     requires.append('enum34')
 
 

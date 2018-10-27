@@ -1,4 +1,5 @@
 import logging
+
 import ldap3
 
 try:
@@ -343,7 +344,7 @@ class LDAP3LoginManager(object):
                     response.user_info = user['attributes']
                     response.user_dn = user['dn']
 
-        except ldap3.core.exceptions.LDAPInvalidCredentialsResult as e:
+        except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
             log.debug(
                 "Authentication was not successful for user '{0}'".format(username))
             response.status = AuthenticationResponseStatus.fail
@@ -398,7 +399,7 @@ class LDAP3LoginManager(object):
                 response.user_groups = self.get_user_groups(
                     dn=bind_user, _connection=connection)
 
-        except ldap3.core.exceptions.LDAPInvalidCredentialsResult as e:
+        except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
             log.debug(
                 "Authentication was not successful for user '{0}'".format(username))
             response.status = AuthenticationResponseStatus.fail
@@ -509,7 +510,7 @@ class LDAP3LoginManager(object):
                     self.destroy_connection(user_connection)
                     break
 
-                except ldap3.core.exceptions.LDAPInvalidCredentialsResult as e:
+                except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
                     log.debug(
                         "Authentication was not successful for "
                         "user '{0}'".format(username))
