@@ -30,7 +30,6 @@ class AuthenticationResponse(object):
 
     def __init__(self, status=AuthenticationResponseStatus.fail,
                  user_info=None, user_id=None, user_dn=None, user_groups=[]):
-
         self.user_info = user_info,
         self.user_id = user_id,
         self.user_dn = user_dn,
@@ -54,7 +53,7 @@ class LDAP3LoginManager(object):
         self._server_pool = ldap3.ServerPool(
             [],
             ldap3.FIRST,
-            active=1,   # Loop through all servers once.
+            active=1,  # Loop through all servers once.
             exhaust=10,  # Remove unreachable servers for 10 seconds.
         )
 
@@ -332,8 +331,8 @@ class LDAP3LoginManager(object):
                 )
 
                 if len(connection.response) == 0 or \
-                    (self.config.get('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND') and
-                        len(connection.response) > 1):
+                        (self.config.get('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND') and
+                         len(connection.response) > 1):
                     # Don't allow them to log in.
                     log.error(
                         "Could not gather extra info for user '{0}'".format(username))
@@ -452,12 +451,13 @@ class LDAP3LoginManager(object):
             user_filter,
         )
 
-        log.debug("Performing an LDAP Search using filter '{0}', base '{1}', "
-                  "and scope '{2}'".format(
-                      search_filter,
-                      self.full_user_search_dn,
-                      self.config.get('LDAP_USER_SEARCH_SCOPE')
-                  ))
+        log.debug(
+            "Performing an LDAP Search using filter '{0}', base '{1}', "
+            "and scope '{2}'".format(
+                search_filter,
+                self.full_user_search_dn,
+                self.config.get('LDAP_USER_SEARCH_SCOPE')
+            ))
 
         connection.search(
             search_base=self.full_user_search_dn,
@@ -470,8 +470,8 @@ class LDAP3LoginManager(object):
         response = AuthenticationResponse()
 
         if len(connection.response) == 0 or \
-            (self.config.get('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND') and
-                len(connection.response) > 1):
+                (self.config.get('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND') and
+                 len(connection.response) > 1):
             # Don't allow them to log in.
             log.debug(
                 "Authentication was not successful for user '{0}'".format(username))
@@ -557,12 +557,13 @@ class LDAP3LoginManager(object):
             user_dn=safe_dn
         )
 
-        log.debug("Searching for groups for specific user with filter '{0}' "
-                  ", base '{1}' and scope '{2}'".format(
-                      search_filter,
-                      group_search_dn or self.full_group_search_dn,
-                      self.config.get('LDAP_GROUP_SEARCH_SCOPE')
-                  ))
+        log.debug(
+            "Searching for groups for specific user with filter '{0}' "
+            ", base '{1}' and scope '{2}'".format(
+                search_filter,
+                group_search_dn or self.full_group_search_dn,
+                self.config.get('LDAP_GROUP_SEARCH_SCOPE')
+            ))
 
         connection.search(
             search_base=group_search_dn or self.full_group_search_dn,
