@@ -20,14 +20,14 @@ long_description = open(readme_path).read()
 
 try:
     version = get_version()
-except Exception as e:
+except Exception:
     version = '0.0.0-dev'
 
 requires = ['ldap3>=2.0.7', 'Flask', 'Flask-wtf']
 
 try:
     import enum  # noqa
-except Exception as e:
+except Exception:
     requires.append('enum34')
 
 
@@ -48,9 +48,9 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Flask',
         'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 2.6',
     ],
     test_suite="flask_ldap3_login_tests",
     tests_require=['mock']
