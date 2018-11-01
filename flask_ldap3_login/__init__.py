@@ -786,7 +786,7 @@ class LDAP3LoginManager(object):
             password=bind_password,
             client_strategy=ldap3.SYNC,
             authentication=authentication,
-            check_names=True,
+            check_names=self.config.get('LDAP_CHECK_NAMES',True),
             raise_exceptions=True,
             **kwargs
         )
