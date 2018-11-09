@@ -1,15 +1,15 @@
+import logging
 import unittest
-import flask_ldap3_login as ldap3_login
+
 import flask
 import mock
 from flask import abort
-import logging
 from ldap3 import Tls
 
+import flask_ldap3_login as ldap3_login
+from flask_ldap3_login.forms import LDAPLoginForm
 from .Directory import DIRECTORY
 from .MockTypes import Server, Connection, ServerPool
-
-from flask_ldap3_login.forms import LDAPLoginForm
 
 try:
     from flask import _app_ctx_stack as stack
@@ -302,7 +302,6 @@ class AuthenticateSearchTestCase(BaseTestCase):
             r.status, ldap3_login.AuthenticationResponseStatus.fail)
 
     def test_save_user(self):
-
         users = {}
 
         @self.manager.save_user
@@ -398,16 +397,16 @@ class GroupMembershipTestCase(BaseTestCase):
             dn='cn=Nick Whyte,ou=users,dc=mydomain,dc=com')
 
         assert DIRECTORY['dc=com']['dc=mydomain'][
-            'ou=groups']['cn=Staff'] in groups
+                   'ou=groups']['cn=Staff'] in groups
         assert DIRECTORY['dc=com']['dc=mydomain'][
-            'ou=groups']['cn=Admins'] in groups
+                   'ou=groups']['cn=Admins'] in groups
 
         groups = self.manager.get_user_groups(
             dn='cn=Fake User,ou=users,dc=mydomain,dc=com')
         assert DIRECTORY['dc=com']['dc=mydomain'][
-            'ou=groups']['cn=Staff'] in groups
+                   'ou=groups']['cn=Staff'] in groups
         assert DIRECTORY['dc=com']['dc=mydomain'][
-            'ou=groups']['cn=Admins'] not in groups
+                   'ou=groups']['cn=Admins'] not in groups
 
 
 @mock.patch('ldap3.ServerPool', new=ServerPool)
@@ -420,7 +419,7 @@ class GetUserInfoTestCase(BaseTestCase):
             'nick@nickwhyte.com'
         )
         self.assertEqual(user, DIRECTORY['dc=com']['dc=mydomain'][
-                         'ou=users']['cn=Nick Whyte'])
+            'ou=users']['cn=Nick Whyte'])
 
 
 @mock.patch('ldap3.ServerPool', new=ServerPool)
@@ -449,11 +448,11 @@ class GroupExistsTestCase(BaseTestCase):
         group = self.manager.get_group_info(
             dn='cn=Staff,ou=groups,dc=mydomain,dc=com')
         self.assertEqual(DIRECTORY['dc=com']['dc=mydomain'][
-                         'ou=groups']['cn=Staff'], group)
+                             'ou=groups']['cn=Staff'], group)
         group = self.manager.get_group_info(
             dn='cn=Admins,ou=groups,dc=mydomain,dc=com')
         self.assertEqual(DIRECTORY['dc=com']['dc=mydomain'][
-                         'ou=groups']['cn=Admins'], group)
+                             'ou=groups']['cn=Admins'], group)
 
 
 @mock.patch('ldap3.ServerPool', new=ServerPool)
@@ -643,3 +642,31 @@ class AddServerTestCase(unittest.TestCase):
         server = ldap3_manager._server_pool.servers[-1]
         self.assertEqual(server.tls, fake_tls_ctx)
         self.assertTrue(server.use_ssl)
+
+
+@mock.patch('ldap3.ServerPool', new=ServerPool)
+@mock.patch('ldap3.Server', new=Server)
+class LdapCheckNamesTestCase(BaseTestCase):
+    @mock.patch('ldap3.Connection')
+    def test_check_names_default(self, connection):
+        self.manager.authenticate('janecitizen', 'fake321')
+        connection.assert_called_once()
+        self.assertEqual(connection.call_args[1]['check_names'], True)
+
+    @mock.patch('ldap3.Connection')
+    def test_check_names_true(self, connection):
+        self.manager.config.update({
+            'LDAP_CHECK_NAMES': True
+        })
+        self.manager.authenticate('janecitizen', 'fake321')
+        connection.assert_called_once()
+        self.assertEqual(connection.call_args[1]['check_names'], True)
+
+    @mock.patch('ldap3.Connection')
+    def test_check_names_false(self, connection):
+        self.manager.config.update({
+            'LDAP_CHECK_NAMES': False
+        })
+        self.manager.authenticate('janecitizen', 'fake321')
+        connection.assert_called_once()
+        self.assertEqual(connection.call_args[1]['check_names'], False)

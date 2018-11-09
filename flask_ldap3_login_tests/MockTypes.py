@@ -1,9 +1,10 @@
-import mock
-from .Directory import get_directory_base, BIND_DIRECT_USERS
-import ldap3
 import logging
 import re
 
+import ldap3
+import mock
+
+from .Directory import get_directory_base, BIND_DIRECT_USERS
 
 log = logging.getLogger(__name__)
 single_filter = re.compile(r'([A-Za-z0-9_\-]+)=(.+)')
