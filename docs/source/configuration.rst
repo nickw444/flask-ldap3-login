@@ -32,6 +32,10 @@ Core
                                          server are readonly. Defaults to 
                                          ``True``
 
+``LDAP_CHECK_NAMES``                     Specifies if attribute names should be 
+                                         checked against the schema. Defaults to 
+                                         ``True``
+
 ``LDAP_BIND_DIRECT_CREDENTIALS``         Instead of searching for a DN of a user
                                          you can instead bind directly to the
                                          directory. Setting this ``True`` will 

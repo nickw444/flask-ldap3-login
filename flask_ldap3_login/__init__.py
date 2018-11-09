@@ -100,6 +100,7 @@ class LDAP3LoginManager(object):
         self.config.setdefault('LDAP_HOST', None)
         self.config.setdefault('LDAP_USE_SSL', False)
         self.config.setdefault('LDAP_READONLY', True)
+        self.config.setdefault('LDAP_CHECK_NAMES', True)
         self.config.setdefault('LDAP_BIND_DIRECT_CREDENTIALS', False)
         self.config.setdefault('LDAP_BIND_DIRECT_PREFIX', '')
         self.config.setdefault('LDAP_BIND_DIRECT_SUFFIX', '')
@@ -786,7 +787,7 @@ class LDAP3LoginManager(object):
             password=bind_password,
             client_strategy=ldap3.SYNC,
             authentication=authentication,
-            check_names=True,
+            check_names=self.config['LDAP_CHECK_NAMES'],
             raise_exceptions=True,
             **kwargs
         )
