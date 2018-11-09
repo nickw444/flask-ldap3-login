@@ -396,17 +396,13 @@ class GroupMembershipTestCase(BaseTestCase):
         groups = self.manager.get_user_groups(
             dn='cn=Nick Whyte,ou=users,dc=mydomain,dc=com')
 
-        assert DIRECTORY['dc=com']['dc=mydomain'][
-                   'ou=groups']['cn=Staff'] in groups
-        assert DIRECTORY['dc=com']['dc=mydomain'][
-                   'ou=groups']['cn=Admins'] in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'] in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'] in groups
 
         groups = self.manager.get_user_groups(
             dn='cn=Fake User,ou=users,dc=mydomain,dc=com')
-        assert DIRECTORY['dc=com']['dc=mydomain'][
-                   'ou=groups']['cn=Staff'] in groups
-        assert DIRECTORY['dc=com']['dc=mydomain'][
-                   'ou=groups']['cn=Admins'] not in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'] in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'] not in groups
 
 
 @mock.patch('ldap3.ServerPool', new=ServerPool)
@@ -447,12 +443,12 @@ class GroupExistsTestCase(BaseTestCase):
     def test_group_exists(self):
         group = self.manager.get_group_info(
             dn='cn=Staff,ou=groups,dc=mydomain,dc=com')
-        self.assertEqual(DIRECTORY['dc=com']['dc=mydomain'][
-                             'ou=groups']['cn=Staff'], group)
+        self.assertEqual(
+            DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'], group)
         group = self.manager.get_group_info(
             dn='cn=Admins,ou=groups,dc=mydomain,dc=com')
-        self.assertEqual(DIRECTORY['dc=com']['dc=mydomain'][
-                             'ou=groups']['cn=Admins'], group)
+        self.assertEqual(
+            DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'], group)
 
 
 @mock.patch('ldap3.ServerPool', new=ServerPool)
