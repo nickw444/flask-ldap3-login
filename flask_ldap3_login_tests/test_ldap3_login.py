@@ -9,7 +9,7 @@ from ldap3 import Tls
 import flask_ldap3_login as ldap3_login
 from flask_ldap3_login.forms import LDAPLoginForm
 from .Directory import DIRECTORY
-from .MockTypes import Server, Connection, ServerPool
+from .MockTypes import Server, Connection
 
 try:
     from flask import _app_ctx_stack as stack
@@ -43,7 +43,6 @@ class BaseTestCase(unittest.TestCase):
         pass
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class AuthenticateDirectTestCase(BaseTestCase):
@@ -97,7 +96,6 @@ class AuthenticateDirectTestCase(BaseTestCase):
             assert form.user['dn'] in users
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class DirectBindPrefixTestCase(BaseTestCase):
@@ -120,7 +118,6 @@ class DirectBindPrefixTestCase(BaseTestCase):
             r.status, ldap3_login.AuthenticationResponseStatus.fail)
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class DirectBindSuffixTestCase(BaseTestCase):
@@ -143,7 +140,6 @@ class DirectBindSuffixTestCase(BaseTestCase):
             r.status, ldap3_login.AuthenticationResponseStatus.fail)
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class EmptyUserGroupDNTestCase(BaseTestCase):
@@ -167,7 +163,6 @@ class EmptyUserGroupDNTestCase(BaseTestCase):
             r.status, ldap3_login.AuthenticationResponseStatus.fail)
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class NoFlaskAppTestCase(unittest.TestCase):
@@ -229,7 +224,6 @@ class NoFlaskAppTestCase(unittest.TestCase):
         connection.unbind()
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class BadServerAddressTestCase(BaseTestCase):
@@ -278,7 +272,6 @@ class BadServerAddressTestCase(BaseTestCase):
             r.status, ldap3_login.AuthenticationResponseStatus.fail)
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class AuthenticateSearchTestCase(BaseTestCase):
@@ -337,7 +330,6 @@ class AuthenticateSearchTestCase(BaseTestCase):
             self.assertFalse(form.validate())
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class LDAPLoginFormTestCase(BaseTestCase):
@@ -353,7 +345,6 @@ class LDAPLoginFormTestCase(BaseTestCase):
             self.assertFalse(form.validate())
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class FailOnMultipleFoundTestCase(BaseTestCase):
@@ -382,7 +373,6 @@ class FailOnMultipleFoundTestCase(BaseTestCase):
             r.status, ldap3_login.AuthenticationResponseStatus.fail)
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class GroupMembershipTestCase(BaseTestCase):
@@ -396,16 +386,19 @@ class GroupMembershipTestCase(BaseTestCase):
         groups = self.manager.get_user_groups(
             dn='cn=Nick Whyte,ou=users,dc=mydomain,dc=com')
 
-        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'] in groups
-        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'] in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups'][
+                   'cn=Staff'] in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups'][
+                   'cn=Admins'] in groups
 
         groups = self.manager.get_user_groups(
             dn='cn=Fake User,ou=users,dc=mydomain,dc=com')
-        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'] in groups
-        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'] not in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups'][
+                   'cn=Staff'] in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups'][
+                   'cn=Admins'] not in groups
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class GetUserInfoTestCase(BaseTestCase):
@@ -418,7 +411,6 @@ class GetUserInfoTestCase(BaseTestCase):
             'ou=users']['cn=Nick Whyte'])
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class SpecialCharactersTestCase(BaseTestCase):
@@ -426,11 +418,12 @@ class SpecialCharactersTestCase(BaseTestCase):
         groups = self.manager.get_user_groups(
             dn='cn=Jane (admin),ou=users,dc=mydomain,dc=com')
 
-        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Staff'] not in groups
-        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'] in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups'][
+                   'cn=Staff'] not in groups
+        assert DIRECTORY['dc=com']['dc=mydomain']['ou=groups'][
+                   'cn=Admins'] in groups
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class GroupExistsTestCase(BaseTestCase):
@@ -448,10 +441,10 @@ class GroupExistsTestCase(BaseTestCase):
         group = self.manager.get_group_info(
             dn='cn=Admins,ou=groups,dc=mydomain,dc=com')
         self.assertEqual(
-            DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'], group)
+            DIRECTORY['dc=com']['dc=mydomain']['ou=groups']['cn=Admins'],
+            group)
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
 class SessionContextTextCase(BaseTestCase):
@@ -491,8 +484,9 @@ class AppFactoryTestCase(BaseTestCase):
     Tests whether the popular Flask app factory pattern can be used.
     """
 
-    def test_server_pool(self):
+    def test_init_app(self):
         """
+        TODO(NW): Correctly implement app factory support
         To support the app factory pattern, the server pool must be reset when
         init_app is called.
         The test is executed 10 times because if you e.g. run unit tests you
@@ -500,7 +494,6 @@ class AppFactoryTestCase(BaseTestCase):
         """
         for i in range(10):
             self.manager.init_app(self.app)
-            self.assertEqual(len(list(self.manager._server_pool)), 1)
 
 
 class LDAPAddServerConfigTestCase(unittest.TestCase):
@@ -526,7 +519,7 @@ class LDAPAddServerConfigTestCase(unittest.TestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_config(config)
 
-        self.assertEqual(len(list(ldap3_manager._server_pool)), 1)
+        self.assertIsNotNone(ldap3_manager._server)
 
     def test_server_added_when_true(self):
         """
@@ -538,7 +531,7 @@ class LDAPAddServerConfigTestCase(unittest.TestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_config(config)
 
-        self.assertEqual(len(list(ldap3_manager._server_pool)), 1)
+        self.assertIsNotNone(ldap3_manager._server)
 
     def test_server_added_when_false(self):
         """
@@ -550,7 +543,16 @@ class LDAPAddServerConfigTestCase(unittest.TestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_config(config)
 
-        self.assertEqual(len(list(ldap3_manager._server_pool)), 0)
+        self.assertIsNone(ldap3_manager._server)
+
+    def test_cannot_add_twice(self):
+        config = dict(LDAPAddServerConfigTestCase.DEFAULT_CONFIG)
+        config['LDAP_ADD_SERVER'] = True
+
+        ldap3_manager = ldap3_login.LDAP3LoginManager()
+        ldap3_manager.init_config(config)
+        with self.assertRaises(AssertionError):
+            ldap3_manager.add_server('localhost', 389, True)
 
 
 class AddServerTestCase(unittest.TestCase):
@@ -578,69 +580,63 @@ class AddServerTestCase(unittest.TestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_config(AddServerTestCase.DEFAULT_CONFIG)
 
-        def add_server():
-            return ldap3_manager.add_server("ad2.mydomain.com", 389,
-                                            use_ssl=False, tls_ctx=object())
-
-        self.assertRaises(ValueError, add_server)
+        with self.assertRaises(ValueError):
+            ldap3_manager.set_server("ad2.mydomain.com", 389,
+                                     use_ssl=False, tls_ctx=object())
 
     @mock.patch('ldap3.Server', new=Server)
-    @mock.patch('ldap3.ServerPool', new=ServerPool)
     def test_server_with_no_tls_ctx(self):
         """
-        Ensures a server is created/added to the pool, however that the server
-        was instantiated with `tls=None` and  use_ssl=False
+        Ensures a server is created, however that the server was instantiated
+        with `tls=None` and  use_ssl=False
         """
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_config(AddServerTestCase.DEFAULT_CONFIG)
-        ldap3_manager.add_server("ad2.mydomain.com", 389, use_ssl=False, tls_ctx=None)
+        ldap3_manager.set_server("ad2.mydomain.com", 389, use_ssl=False,
+                                 tls_ctx=None)
 
-        self.assertEqual(len(ldap3_manager._server_pool.servers), 1)
-
-        server = ldap3_manager._server_pool.servers[-1]
+        self.assertIsNotNone(ldap3_manager._server)
+        server = ldap3_manager._server
         self.assertEqual(server.tls, None)
         self.assertFalse(server.use_ssl)
 
     @mock.patch('ldap3.Server', new=Server)
-    @mock.patch('ldap3.ServerPool', new=ServerPool)
     def test_server_with_no_tls_with_ssl(self):
         """
-        Ensures a server is created/added to the pool, however that the server
-        was instantiated with `tls=None` and use_ssl=True.
+        Ensures a server is created, and that the server was instantiated
+        with `tls=None` and use_ssl=True.
         """
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_config(AddServerTestCase.DEFAULT_CONFIG)
-        ldap3_manager.add_server("ad2.mydomain.com", 389,
+        ldap3_manager.set_server("ad2.mydomain.com", 389,
                                  use_ssl=True, tls_ctx=None)
 
-        self.assertEqual(len(ldap3_manager._server_pool.servers), 1)
+        self.assertIsNotNone(ldap3_manager._server)
 
-        server = ldap3_manager._server_pool.servers[-1]
+        server = ldap3_manager._server
         self.assertEqual(server.tls, None)
         self.assertTrue(server.use_ssl)
 
     @mock.patch('ldap3.Server', new=Server)
-    @mock.patch('ldap3.ServerPool', new=ServerPool)
     def test_server_with_tls_with_ssl(self):
         """
-        Ensures a server is created/added to the pool, however that the server
-        was instantiated with `tls=<TLS CTX OBJECT>` and use_ssl=True.
+        Ensures a server is created, and that the server was instantiated
+        with `tls=<TLS CTX OBJECT>` and use_ssl=True.
         """
         fake_tls_ctx = Tls()
 
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_config(AddServerTestCase.DEFAULT_CONFIG)
-        ldap3_manager.add_server("ad2.mydomain.com", 389,
+        ldap3_manager.set_server("ad2.mydomain.com", 389,
                                  use_ssl=True, tls_ctx=fake_tls_ctx)
 
-        self.assertEqual(len(ldap3_manager._server_pool.servers), 1)
+        self.assertIsNotNone(ldap3_manager._server)
 
-        server = ldap3_manager._server_pool.servers[-1]
+        server = ldap3_manager._server
         self.assertEqual(server.tls, fake_tls_ctx)
         self.assertTrue(server.use_ssl)
 
 
-@mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 class LdapCheckNamesTestCase(BaseTestCase):
     @mock.patch('ldap3.Connection')

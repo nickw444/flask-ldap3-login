@@ -50,12 +50,7 @@ class LDAP3LoginManager(object):
 
         self._save_user = None
         self.config = {}
-        self._server_pool = ldap3.ServerPool(
-            [],
-            ldap3.FIRST,
-            active=1,  # Loop through all servers once.
-            exhaust=10,  # Remove unreachable servers for 10 seconds.
-        )
+        self._server = None
 
         if app is not None:
             self.init_app(app)
@@ -71,10 +66,7 @@ class LDAP3LoginManager(object):
         '''
 
         app.ldap3_login_manager = self
-
-        servers = list(self._server_pool)
-        for s in servers:
-            self._server_pool.remove(s)
+        self._server = None
 
         self.init_config(app.config)
 
@@ -82,8 +74,6 @@ class LDAP3LoginManager(object):
             app.teardown_appcontext(self.teardown)
         else:  # pragma: no cover
             app.teardown_request(self.teardown)
-
-        self.app = app
 
     def init_config(self, config):
         '''
@@ -138,8 +128,9 @@ class LDAP3LoginManager(object):
             'LDAP_GET_GROUP_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
         self.config.setdefault('LDAP_ADD_SERVER', True)
 
+        # TODO(NW): Find migration strategy to change config to LDAP_SET_SERVER
         if self.config['LDAP_ADD_SERVER']:
-            self.add_server(
+            self.set_server(
                 hostname=self.config['LDAP_HOST'],
                 port=self.config['LDAP_PORT'],
                 use_ssl=self.config['LDAP_USE_SSL']
@@ -147,8 +138,15 @@ class LDAP3LoginManager(object):
 
     def add_server(self, hostname, port, use_ssl, tls_ctx=None):
         """
-        Add an additional server to the server pool and return the
-        freshly created server.
+        Deprecated: Please use `set_server` instead.
+        """
+        log.warning('flask_ldap3_login.add_server is deprecated. Please use '
+                    'set_server instead.')
+        return self.set_server(hostname, port, use_ssl, tls_ctx)
+
+    def set_server(self, hostname, port, use_ssl, tls_ctx=None):
+        """
+        Create & set the server instance used to bind to the LDAP server. 
 
         Args:
             hostname (str): Hostname of the server
@@ -160,16 +158,19 @@ class LDAP3LoginManager(object):
         Returns:
             ldap3.Server: The freshly created server object.
         """
+        if self._server is not None:
+            raise AssertionError('Cannot set server when a server already is '
+                                 'set')
+
         if not use_ssl and tls_ctx:
             raise ValueError("Cannot specify a TLS context and not use SSL!")
-        server = ldap3.Server(
+        self._server = ldap3.Server(
             hostname,
             port=port,
             use_ssl=use_ssl,
             tls=tls_ctx
         )
-        self._server_pool.add(server)
-        return server
+        return self._server
 
     def _contextualise_connection(self, connection):
         """
@@ -310,7 +311,8 @@ class LDAP3LoginManager(object):
             response.status = AuthenticationResponseStatus.success
             response.user_id = username
             log.debug(
-                "Authentication was successful for user '{0}'".format(username))
+                "Authentication was successful for user '{0}'".format(
+                    username))
 
             if self.config.get('LDAP_BIND_DIRECT_GET_USER_INFO'):
                 # User wants extra info about the bind
@@ -332,11 +334,13 @@ class LDAP3LoginManager(object):
                 )
 
                 if len(connection.response) == 0 or \
-                        (self.config.get('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND') and
+                        (self.config.get(
+                            'LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND') and
                          len(connection.response) > 1):
                     # Don't allow them to log in.
                     log.error(
-                        "Could not gather extra info for user '{0}'".format(username))
+                        "Could not gather extra info for user '{0}'".format(
+                            username))
                 else:
 
                     user = connection.response[0]
@@ -346,7 +350,8 @@ class LDAP3LoginManager(object):
 
         except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
             log.debug(
-                "Authentication was not successful for user '{0}'".format(username))
+                "Authentication was not successful for user '{0}'".format(
+                    username))
             response.status = AuthenticationResponseStatus.fail
         except Exception as e:
             log.error(e)
@@ -386,7 +391,8 @@ class LDAP3LoginManager(object):
         try:
             connection.bind()
             log.debug(
-                "Authentication was successful for user '{0}'".format(username))
+                "Authentication was successful for user '{0}'".format(
+                    username))
             response.status = AuthenticationResponseStatus.success
             # Get user info here.
 
@@ -401,7 +407,8 @@ class LDAP3LoginManager(object):
 
         except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
             log.debug(
-                "Authentication was not successful for user '{0}'".format(username))
+                "Authentication was not successful for user '{0}'".format(
+                    username))
             response.status = AuthenticationResponseStatus.fail
         except Exception as e:
             log.error(e)
@@ -434,9 +441,10 @@ class LDAP3LoginManager(object):
 
         try:
             connection.bind()
-            log.debug("Successfully bound to LDAP as '{0}' for search_bind method".format(
-                self.config.get('LDAP_BIND_USER_DN') or 'Anonymous'
-            ))
+            log.debug(
+                "Successfully bound to LDAP as '{0}' for search_bind method".format(
+                    self.config.get('LDAP_BIND_USER_DN') or 'Anonymous'
+                ))
         except Exception as e:
             self.destroy_connection(connection)
             log.error(e)
@@ -475,7 +483,8 @@ class LDAP3LoginManager(object):
                  len(connection.response) > 1):
             # Don't allow them to log in.
             log.debug(
-                "Authentication was not successful for user '{0}'".format(username))
+                "Authentication was not successful for user '{0}'".format(
+                    username))
 
         else:
             for user in connection.response:
@@ -497,7 +506,8 @@ class LDAP3LoginManager(object):
                 try:
                     user_connection.bind()
                     log.debug(
-                        "Authentication was successful for user '{0}'".format(username))
+                        "Authentication was successful for user '{0}'".format(
+                            username))
                     response.status = AuthenticationResponseStatus.success
 
                     # Populate User Data
@@ -781,7 +791,7 @@ class LDAP3LoginManager(object):
         log.debug("Opening connection with bind user '{0}'".format(
             bind_user or 'Anonymous'))
         connection = ldap3.Connection(
-            server=self._server_pool,
+            server=self._server,
             read_only=self.config.get('LDAP_READONLY'),
             user=bind_user,
             password=bind_password,

@@ -80,7 +80,7 @@ class Connection(mock.MagicMock):
         pass
 
     def bind(self):
-        if not self.server or self.server.servers[0].host != 'ad.mydomain.com':
+        if not self.server or self.server.host != 'ad.mydomain.com':
             raise ldap3.core.exceptions.LDAPBindError
 
         if self.user:
@@ -161,12 +161,3 @@ class Connection(mock.MagicMock):
     @property
     def result(self):
         return self._result
-
-
-class ServerPool(mock.MagicMock):
-    def __init__(self, servers, *args, **kwargs):
-        mock.MagicMock.__init__(self)
-        self.servers = servers
-
-    def add(self, server):
-        self.servers.append(server)
