@@ -1,4 +1,5 @@
 import os
+
 from setuptools import setup
 
 
@@ -8,7 +9,7 @@ def get_version():
         'VERSION')
     v = open(version_path).read()
     if type(v) == str:
-            return v.strip()
+        return v.strip()
     return v.decode('UTF-8').strip()
 
 
@@ -29,7 +30,6 @@ try:
     import enum  # noqa
 except Exception:
     requires.append('enum34')
-
 
 setup(
     name='flask-ldap3-login',
