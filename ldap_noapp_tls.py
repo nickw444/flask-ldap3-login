@@ -53,10 +53,7 @@ ldap_manager.init_config(config)
 tls_ctx = Tls(
     validate=ssl.CERT_REQUIRED,
     version=ssl.PROTOCOL_TLSv1,
-    ca_certs_file='/path/to/cacerts',
-    valid_names=[
-        'ad.mydomain.com',
-    ]
+    ca_certs_file='/path/to/cacerts'
 )
 
 ldap_manager.add_server(
