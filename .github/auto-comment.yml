@@ -1,11 +1,11 @@
 # Comment to a new issue.
-issueOpened: >
-  Thank your for raising a issue.
-  
-  Unfortunately I have made the difficult decision that I will no longer be actively maintaining this repo.  I have 
-  too much on my plate to give this library the love it needs and deserves. New features and bug 
-  fixes have became harder to manually test as I no longer had redily available testing environments, 
-  giving me lower confidence in iterating and improving the library. 
-  
-  I am now in the process of finding a new maintainer - if this is something that may interest you, you 
+issuesOpened: >
+  Thank you for raising a issue.
+
+  Unfortunately I have made the difficult decision that I will no longer be actively maintaining this repo.  I have
+  too much on my plate to give this library the love it needs and deserves. New features and bug
+  fixes have became harder to manually test as I no longer had redily available testing environments,
+  giving me lower confidence in iterating and improving the library.
+
+  I am now in the process of finding a new maintainer - if this is something that may interest you, you
   can find more details in the [README](https://github.com/nickw444/flask-ldap3-login#maintainer-wanted).
