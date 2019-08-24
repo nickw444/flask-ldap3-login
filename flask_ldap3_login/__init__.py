@@ -15,6 +15,45 @@ AuthenticationResponseStatus = Enum(
     'AuthenticationResponseStatus', 'fail success')
 
 
+_CONFIG_DEFAULTS = [
+    ('LDAP_PORT', 389),
+    ('LDAP_HOST', None),
+    ('LDAP_USE_SSL', False),
+    ('LDAP_READONLY', True),
+    ('LDAP_CHECK_NAMES', True),
+    ('LDAP_BIND_DIRECT_CREDENTIALS', False),
+    ('LDAP_BIND_DIRECT_PREFIX', ''),
+    ('LDAP_BIND_DIRECT_SUFFIX', ''),
+    ('LDAP_BIND_DIRECT_GET_USER_INFO', True),
+    ('LDAP_ALWAYS_SEARCH_BIND', False),
+    ('LDAP_BASE_DN', ''),
+    ('LDAP_BIND_USER_DN', None),
+    ('LDAP_BIND_USER_PASSWORD', None),
+    ('LDAP_SEARCH_FOR_GROUPS', True),
+    ('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND', False),
+
+    # Prepended to the Base DN to limit scope when searching for
+    # Users/Groups.
+    ('LDAP_USER_DN', ''),
+    ('LDAP_GROUP_DN', ''),
+
+    ('LDAP_BIND_AUTHENTICATION_TYPE', 'SIMPLE'),
+
+    # Ldap Filters
+    ('LDAP_USER_SEARCH_SCOPE', 'LEVEL'),
+    ('LDAP_USER_OBJECT_FILTER', '(objectclass=person)'),
+    ('LDAP_USER_LOGIN_ATTR', 'uid'),
+    ('LDAP_USER_RDN_ATTR', 'uid'),
+    ('LDAP_GET_USER_ATTRIBUTES', ldap3.ALL_ATTRIBUTES),
+
+    ('LDAP_GROUP_SEARCH_SCOPE', 'LEVEL'),
+    ('LDAP_GROUP_OBJECT_FILTER', '(objectclass=group)'),
+    ('LDAP_GROUP_MEMBERS_ATTR', 'uniqueMember'),
+    ('LDAP_GET_GROUP_ATTRIBUTES', ldap3.ALL_ATTRIBUTES),
+    ('LDAP_ADD_SERVER', True),
+]
+
+
 class AuthenticationResponse(object):
     """
     A response object when authenticating. Lets us pass status codes around
@@ -49,7 +88,7 @@ class LDAP3LoginManager(object):
     def __init__(self, app=None):
 
         self._save_user = None
-        self.config = {}
+        self.config = dict(_CONFIG_DEFAULTS)
         self._server_pool = ldap3.ServerPool(
             [],
             ldap3.FIRST,
@@ -76,67 +115,7 @@ class LDAP3LoginManager(object):
         for s in servers:
             self._server_pool.remove(s)
 
-        self.init_config(app.config)
-
-        if hasattr(app, 'teardown_appcontext'):
-            app.teardown_appcontext(self.teardown)
-        else:  # pragma: no cover
-            app.teardown_request(self.teardown)
-
-        self.app = app
-
-    def init_config(self, config):
-        '''
-        Configures this extension with a given configuration dictionary.
-        This allows use of this extension without a flask app.
-
-        Args:
-            config (dict): A dictionary with configuration keys
-        '''
-
-        self.config.update(config)
-
-        self.config.setdefault('LDAP_PORT', 389)
-        self.config.setdefault('LDAP_HOST', None)
-        self.config.setdefault('LDAP_USE_SSL', False)
-        self.config.setdefault('LDAP_READONLY', True)
-        self.config.setdefault('LDAP_CHECK_NAMES', True)
-        self.config.setdefault('LDAP_BIND_DIRECT_CREDENTIALS', False)
-        self.config.setdefault('LDAP_BIND_DIRECT_PREFIX', '')
-        self.config.setdefault('LDAP_BIND_DIRECT_SUFFIX', '')
-        self.config.setdefault('LDAP_BIND_DIRECT_GET_USER_INFO', True)
-        self.config.setdefault('LDAP_ALWAYS_SEARCH_BIND', False)
-        self.config.setdefault('LDAP_BASE_DN', '')
-        self.config.setdefault('LDAP_BIND_USER_DN', None)
-        self.config.setdefault('LDAP_BIND_USER_PASSWORD', None)
-        self.config.setdefault('LDAP_SEARCH_FOR_GROUPS', True)
-        self.config.setdefault('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND', False)
-
-        # Prepended to the Base DN to limit scope when searching for
-        # Users/Groups.
-        self.config.setdefault('LDAP_USER_DN', '')
-        self.config.setdefault('LDAP_GROUP_DN', '')
-
-        self.config.setdefault('LDAP_BIND_AUTHENTICATION_TYPE', 'SIMPLE')
-
-        # Ldap Filters
-        self.config.setdefault('LDAP_USER_SEARCH_SCOPE',
-                               'LEVEL')
-        self.config.setdefault('LDAP_USER_OBJECT_FILTER',
-                               '(objectclass=person)')
-        self.config.setdefault('LDAP_USER_LOGIN_ATTR', 'uid')
-        self.config.setdefault('LDAP_USER_RDN_ATTR', 'uid')
-        self.config.setdefault(
-            'LDAP_GET_USER_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
-
-        self.config.setdefault('LDAP_GROUP_SEARCH_SCOPE',
-                               'LEVEL')
-        self.config.setdefault(
-            'LDAP_GROUP_OBJECT_FILTER', '(objectclass=group)')
-        self.config.setdefault('LDAP_GROUP_MEMBERS_ATTR', 'uniqueMember')
-        self.config.setdefault(
-            'LDAP_GET_GROUP_ATTRIBUTES', ldap3.ALL_ATTRIBUTES)
-        self.config.setdefault('LDAP_ADD_SERVER', True)
+        self.config.update(app.config)
 
         if self.config['LDAP_ADD_SERVER']:
             self.add_server(
@@ -144,6 +123,13 @@ class LDAP3LoginManager(object):
                 port=self.config['LDAP_PORT'],
                 use_ssl=self.config['LDAP_USE_SSL']
             )
+
+        if hasattr(app, 'teardown_appcontext'):
+            app.teardown_appcontext(self.teardown)
+        else:  # pragma: no cover
+            app.teardown_request(self.teardown)
+
+        self.app = app
 
     def add_server(self, hostname, port, use_ssl, tls_ctx=None):
         """

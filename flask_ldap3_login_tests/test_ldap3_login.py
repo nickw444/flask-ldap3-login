@@ -170,68 +170,6 @@ class EmptyUserGroupDNTestCase(BaseTestCase):
 @mock.patch('ldap3.ServerPool', new=ServerPool)
 @mock.patch('ldap3.Server', new=Server)
 @mock.patch('ldap3.Connection', new=Connection)
-class NoFlaskAppTestCase(unittest.TestCase):
-    def setUp(self):
-        config = dict(
-            LDAP_HOST='ad.mydomain.com',
-            LDAP_BASE_DN='dc=mydomain,dc=com',
-            LDAP_USER_DN='ou=users',
-            LDAP_GROUP_DN='ou=groups',
-            LDAP_BIND_USER_DN='cn=Bind,dc=mydomain,dc=com',
-            LDAP_BIND_USER_PASSWORD='bind123',
-            LDAP_USER_RDN_ATTR='cn',
-            LDAP_USER_LOGIN_ATTR='cn'
-        )
-        ldap3_manager = ldap3_login.LDAP3LoginManager()
-        ldap3_manager.init_config(config)
-        self.manager = ldap3_manager
-
-    def test_login(self):
-        r = self.manager.authenticate('Nick Whyte', 'fake123')
-        self.assertEqual(
-            r.status, ldap3_login.AuthenticationResponseStatus.success)
-        r = self.manager.authenticate('Nick Whyte', 'fake1234')
-        self.assertEqual(
-            r.status, ldap3_login.AuthenticationResponseStatus.fail)
-
-    def test_save_user(self):
-        users = {}
-
-        @self.manager.save_user
-        def user_saver(dn, username, data, memberships):
-            users[dn] = data
-            return users[dn]
-
-        r = self.manager.authenticate('Nick Whyte', 'fake123')
-        self.manager._save_user(
-            r.user_dn,
-            r.user_id,
-            r.user_info,
-            r.user_groups
-        )
-        assert r.user_dn in users
-
-    def test_connection_outside_of_flask(self):
-        exception_raised = False
-        try:
-            self.manager.connection
-        except Exception:
-            exception_raised = True
-
-        self.assertTrue(exception_raised)
-
-    def test_make_connection(self):
-        connection = self.manager.make_connection(
-            'cn=Nick Whyte,ou=users,dc=mydomain,dc=com',
-            'fake123'
-        )
-        connection.bind()
-        connection.unbind()
-
-
-@mock.patch('ldap3.ServerPool', new=ServerPool)
-@mock.patch('ldap3.Server', new=Server)
-@mock.patch('ldap3.Connection', new=Connection)
 class BadServerAddressTestCase(BaseTestCase):
     def setUp(self):
         app = flask.Flask(__name__)
@@ -503,7 +441,7 @@ class AppFactoryTestCase(BaseTestCase):
             self.assertEqual(len(list(self.manager._server_pool)), 1)
 
 
-class LDAPAddServerConfigTestCase(unittest.TestCase):
+class LDAPAddServerConfigTestCase(BaseTestCase):
     """Tests for the `LDAP_ADD_SERVER` config key"""
 
     DEFAULT_CONFIG = dict(
@@ -521,10 +459,10 @@ class LDAPAddServerConfigTestCase(unittest.TestCase):
         """
         Ensures a default server is added when `LDAP_ADD_SERVER` is not set.
         """
-        config = dict(LDAPAddServerConfigTestCase.DEFAULT_CONFIG)
+        self.app.config.update(LDAPAddServerConfigTestCase.DEFAULT_CONFIG)
 
         ldap3_manager = ldap3_login.LDAP3LoginManager()
-        ldap3_manager.init_config(config)
+        ldap3_manager.init_app(self.app)
 
         self.assertEqual(len(list(ldap3_manager._server_pool)), 1)
 
@@ -532,11 +470,11 @@ class LDAPAddServerConfigTestCase(unittest.TestCase):
         """
         Ensures a default server is added when `LDAP_ADD_SERVER` is True.
         """
-        config = dict(LDAPAddServerConfigTestCase.DEFAULT_CONFIG)
-        config['LDAP_ADD_SERVER'] = True
+        self.app.config.update(LDAPAddServerConfigTestCase.DEFAULT_CONFIG)
+        self.app.config['LDAP_ADD_SERVER'] = True
 
         ldap3_manager = ldap3_login.LDAP3LoginManager()
-        ldap3_manager.init_config(config)
+        ldap3_manager.init_app(self.app)
 
         self.assertEqual(len(list(ldap3_manager._server_pool)), 1)
 
@@ -544,16 +482,16 @@ class LDAPAddServerConfigTestCase(unittest.TestCase):
         """
         Ensures no server is added when `LDAP_ADD_SERVER` is False.
         """
-        config = dict(LDAPAddServerConfigTestCase.DEFAULT_CONFIG)
-        config['LDAP_ADD_SERVER'] = False
+        self.app.config.update(LDAPAddServerConfigTestCase.DEFAULT_CONFIG)
+        self.app.config['LDAP_ADD_SERVER'] = False
 
         ldap3_manager = ldap3_login.LDAP3LoginManager()
-        ldap3_manager.init_config(config)
+        ldap3_manager.init_app(self.app)
 
         self.assertEqual(len(list(ldap3_manager._server_pool)), 0)
 
 
-class AddServerTestCase(unittest.TestCase):
+class AddServerTestCase(BaseTestCase):
     """
     Tests for the `add_server` method.
     """
@@ -576,7 +514,8 @@ class AddServerTestCase(unittest.TestCase):
         is passed together.
         """
         ldap3_manager = ldap3_login.LDAP3LoginManager()
-        ldap3_manager.init_config(AddServerTestCase.DEFAULT_CONFIG)
+        self.app.config.update(AddServerTestCase.DEFAULT_CONFIG)
+        ldap3_manager.init_app(self.app)
 
         def add_server():
             return ldap3_manager.add_server("ad2.mydomain.com", 389,
@@ -592,7 +531,8 @@ class AddServerTestCase(unittest.TestCase):
         was instantiated with `tls=None` and  use_ssl=False
         """
         ldap3_manager = ldap3_login.LDAP3LoginManager()
-        ldap3_manager.init_config(AddServerTestCase.DEFAULT_CONFIG)
+        self.app.config.update(AddServerTestCase.DEFAULT_CONFIG)
+        ldap3_manager.init_app(self.app)
         ldap3_manager.add_server("ad2.mydomain.com", 389, use_ssl=False, tls_ctx=None)
 
         self.assertEqual(len(ldap3_manager._server_pool.servers), 1)
@@ -609,7 +549,8 @@ class AddServerTestCase(unittest.TestCase):
         was instantiated with `tls=None` and use_ssl=True.
         """
         ldap3_manager = ldap3_login.LDAP3LoginManager()
-        ldap3_manager.init_config(AddServerTestCase.DEFAULT_CONFIG)
+        self.app.config.update(AddServerTestCase.DEFAULT_CONFIG)
+        ldap3_manager.init_app(self.app)
         ldap3_manager.add_server("ad2.mydomain.com", 389,
                                  use_ssl=True, tls_ctx=None)
 
@@ -629,7 +570,8 @@ class AddServerTestCase(unittest.TestCase):
         fake_tls_ctx = Tls()
 
         ldap3_manager = ldap3_login.LDAP3LoginManager()
-        ldap3_manager.init_config(AddServerTestCase.DEFAULT_CONFIG)
+        self.app.config.update(AddServerTestCase.DEFAULT_CONFIG)
+        ldap3_manager.init_app(self.app)
         ldap3_manager.add_server("ad2.mydomain.com", 389,
                                  use_ssl=True, tls_ctx=fake_tls_ctx)
 
