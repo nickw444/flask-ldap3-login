@@ -163,10 +163,13 @@ class Connection(mock.MagicMock):
         return self._result
 
 
-class ServerPool(mock.MagicMock):
+class ServerPool(mock.Mock):
     def __init__(self, servers, *args, **kwargs):
-        mock.MagicMock.__init__(self)
+        mock.Mock.__init__(self)
         self.servers = servers
 
     def add(self, server):
         self.servers.append(server)
+
+    def __iter__(self):
+        return iter(self.servers)
