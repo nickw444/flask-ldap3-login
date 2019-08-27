@@ -18,18 +18,26 @@ The application stores the users in the dictionary ``users``.
 .. literalinclude:: ../../ldap_app.py
 
 
-Basic Scripting Usage (Without a Flask App)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Basic Scripting Usage
+~~~~~~~~~~~~~~~~~~~~~
 
-This is an example for if you wish to simply use the module, maybe for testing or for use in some other environment.
+Using this module without a Flask application is no longer supported.
+(It is a Flask plugin, after all.)
+However, it can be useful to have scripts along with a Flask application.
+Flask supports this through the ``flask`` command-line tool,
+see `Flask's documentation <https://flask.palletsprojects.com/en/1.1.x/>`_ for details.
+Here's a quick example of a command you could add to the above app::
 
-.. literalinclude:: ../../ldap_noapp.py
-
+    @app.cli.command('check-credentials')
+    @click.password_option(confirm=False)
+    @click.argument('username')
+    def check_credentials(username, password):
+        click.echo(ldap_manager.authenticate(username, password))
 
 Custom TLS Context
 ~~~~~~~~~~~~~~~~~~
 
-This is an example that shows how to initialize a custom TLS context for
-securing communication between the module and a secure LDAP (LDAPS server.
+This example is the app from before modified to use a custom TLS context
+for securing communication to a secure LDAP (LDAPS) server.
 
-.. literalinclude:: ../../ldap_noapp_tls.py
+.. literalinclude:: ../../ldap_app_tls.py
