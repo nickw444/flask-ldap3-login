@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # flask-ldap3-login documentation build configuration file, created by
 # sphinx-quickstart on Thu Oct 13 21:52:05 2016.
@@ -56,9 +55,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'flask-ldap3-login'
-copyright = u'2016, Nick Whyte'
-author = u'Nick Whyte'
+project = 'flask-ldap3-login'
+copyright = '2016, Nick Whyte'
+author = 'Nick Whyte'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -279,8 +278,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'flask-ldap3-login.tex', u'flask-ldap3-login Documentation',
-     u'Nick Whyte', 'manual'),
+    (master_doc, 'flask-ldap3-login.tex', 'flask-ldap3-login Documentation',
+     'Nick Whyte', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -315,7 +314,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'flask-ldap3-login', u'flask-ldap3-login Documentation',
+    (master_doc, 'flask-ldap3-login', 'flask-ldap3-login Documentation',
      [author], 1)
 ]
 
@@ -330,7 +329,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'flask-ldap3-login', u'flask-ldap3-login Documentation',
+    (master_doc, 'flask-ldap3-login', 'flask-ldap3-login Documentation',
      author, 'flask-ldap3-login', 'One line description of project.',
      'Miscellaneous'),
 ]

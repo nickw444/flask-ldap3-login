@@ -57,7 +57,7 @@ def build_comparison(cmp_string):
 
             return lamb
         else:
-            raise Exception("Malformed Filter '{0}'".format(cmp_string))
+            raise Exception("Malformed Filter '{}'".format(cmp_string))
 
 
 class Server(mock.MagicMock):
@@ -103,11 +103,11 @@ class Connection(mock.MagicMock):
     def search(self, search_base='', search_filter='(objectClass=*)',
                search_scope=ldap3.SUBTREE, attributes=None):
 
-        log.info("Search began for base '{0}' with filter '{1}' in scope"
-                 " '{2}' with attributes '{3}'".format(search_base,
-                                                       search_filter,
-                                                       search_scope,
-                                                       attributes))
+        log.info("Search began for base '{}' with filter '{}' in scope"
+                 " '{}' with attributes '{}'".format(search_base,
+                                                     search_filter,
+                                                     search_scope,
+                                                     attributes))
 
         check_user = build_comparison(search_filter)[0]
 
