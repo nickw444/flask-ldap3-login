@@ -26,11 +26,6 @@ except Exception:
 
 requires = ['ldap3>=2.0.7', 'Flask', 'Flask-wtf']
 
-try:
-    import enum  # noqa
-except Exception:
-    requires.append('enum34')
-
 setup(
     name='flask-ldap3-login',
     version=version,
@@ -47,10 +42,11 @@ setup(
         'Programming Language :: Python',
         'Environment :: Web Environment',
         'Framework :: Flask',
+        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3 :: Only',
     ],
     test_suite="flask_ldap3_login_tests",
     tests_require=['mock']

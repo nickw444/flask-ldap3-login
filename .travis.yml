@@ -1,16 +1,15 @@
 language: python
 python:
-  - "2.7"
+  - "pypy3"
   - "3.5"
   - "3.6"
   - "3.7"
-  - "pypy"
 
 install:
   - pip install coveralls flake8
   - pip install .
 
-script: 
+script:
   - flake8 .
   - coverage run --source=flask_ldap3_login setup.py test
 
@@ -24,6 +23,6 @@ deploy:
   skip_cleanup: true
   user: nickw444-deploy
   password: "$PYPI_PASSWORD"
-  on: 
+  on:
     tags: true
     python: 3.6
