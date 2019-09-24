@@ -48,7 +48,7 @@ class BaseTestCase(unittest.TestCase):
 @mock.patch('ldap3.Connection', new=Connection)
 class AuthenticateDirectTestCase(BaseTestCase):
     def setUp(self):
-        super(AuthenticateDirectTestCase, self).setUp()
+        super().setUp()
 
         self.manager.config.update({
             'LDAP_USER_RDN_ATTR': 'cn',
@@ -56,7 +56,7 @@ class AuthenticateDirectTestCase(BaseTestCase):
         })
 
     def tearDown(self):
-        super(AuthenticateDirectTestCase, self).tearDown()
+        super().tearDown()
 
     def test_login(self):
         r = self.manager.authenticate('Nick Whyte', 'fake123')
@@ -102,7 +102,7 @@ class AuthenticateDirectTestCase(BaseTestCase):
 @mock.patch('ldap3.Connection', new=Connection)
 class DirectBindPrefixTestCase(BaseTestCase):
     def setUp(self):
-        super(DirectBindPrefixTestCase, self).setUp()
+        super().setUp()
 
         self.manager.config.update({
             'LDAP_USER_RDN_ATTR': 'cn',
@@ -125,7 +125,7 @@ class DirectBindPrefixTestCase(BaseTestCase):
 @mock.patch('ldap3.Connection', new=Connection)
 class DirectBindSuffixTestCase(BaseTestCase):
     def setUp(self):
-        super(DirectBindSuffixTestCase, self).setUp()
+        super().setUp()
 
         self.manager.config.update({
             'LDAP_USER_RDN_ATTR': 'cn',
@@ -148,7 +148,7 @@ class DirectBindSuffixTestCase(BaseTestCase):
 @mock.patch('ldap3.Connection', new=Connection)
 class EmptyUserGroupDNTestCase(BaseTestCase):
     def setUp(self):
-        super(EmptyUserGroupDNTestCase, self).setUp()
+        super().setUp()
 
         self.manager.config.update({
             'LDAP_USER_RDN_ATTR': 'cn',
@@ -221,7 +221,7 @@ class BadServerAddressTestCase(BaseTestCase):
 @mock.patch('ldap3.Connection', new=Connection)
 class AuthenticateSearchTestCase(BaseTestCase):
     def setUp(self):
-        super(AuthenticateSearchTestCase, self).setUp()
+        super().setUp()
 
         self.manager.config.update({
             'LDAP_USER_RDN_ATTR': 'cn',
@@ -229,7 +229,7 @@ class AuthenticateSearchTestCase(BaseTestCase):
         })
 
     def tearDown(self):
-        super(AuthenticateSearchTestCase, self).tearDown()
+        super().tearDown()
 
     def test_login(self):
         r = self.manager.authenticate('nick@nickwhyte.com', 'fake123')
@@ -325,10 +325,10 @@ class FailOnMultipleFoundTestCase(BaseTestCase):
 @mock.patch('ldap3.Connection', new=Connection)
 class GroupMembershipTestCase(BaseTestCase):
     def setUp(self):
-        super(GroupMembershipTestCase, self).setUp()
+        super().setUp()
 
     def tearDown(self):
-        super(GroupMembershipTestCase, self).tearDown()
+        super().tearDown()
 
     def test_group_membership(self):
         groups = self.manager.get_user_groups(
@@ -373,10 +373,10 @@ class SpecialCharactersTestCase(BaseTestCase):
 @mock.patch('ldap3.Connection', new=Connection)
 class GroupExistsTestCase(BaseTestCase):
     def setUp(self):
-        super(GroupExistsTestCase, self).setUp()
+        super().setUp()
 
     def tearDown(self):
-        super(GroupExistsTestCase, self).tearDown()
+        super().tearDown()
 
     def test_group_exists(self):
         group = self.manager.get_group_info(

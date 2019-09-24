@@ -63,7 +63,7 @@ class LDAPLoginForm(FlaskForm):
         valid = FlaskForm.validate(self, *args, **kwargs)
         if not valid:
             logging.debug("Form validation failed before we had a chance to "
-                          "check ldap. Reasons: '{0}'".format(self.errors))
+                          "check ldap. Reasons: '{}'".format(self.errors))
             return valid
 
         return self.validate_ldap()

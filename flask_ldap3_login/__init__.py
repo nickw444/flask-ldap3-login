@@ -54,7 +54,7 @@ _CONFIG_DEFAULTS = [
 ]
 
 
-class AuthenticationResponse(object):
+class AuthenticationResponse:
     """
     A response object when authenticating. Lets us pass status codes around
     and also user data.
@@ -76,7 +76,7 @@ class AuthenticationResponse(object):
         self.status = status
 
 
-class LDAP3LoginManager(object):
+class LDAP3LoginManager:
     """
     Initialise a LDAP3LoginManager. If app is passed, init_app is called
     within this call.
@@ -296,7 +296,7 @@ class LDAP3LoginManager(object):
             response.status = AuthenticationResponseStatus.success
             response.user_id = username
             log.debug(
-                "Authentication was successful for user '{0}'".format(username))
+                "Authentication was successful for user '{}'".format(username))
 
             if self.config.get('LDAP_BIND_DIRECT_GET_USER_INFO'):
                 # User wants extra info about the bind
@@ -304,7 +304,7 @@ class LDAP3LoginManager(object):
                     search_attr=self.config.get('LDAP_USER_LOGIN_ATTR'),
                     username=username
                 )
-                search_filter = '(&{0}{1})'.format(
+                search_filter = '(&{}{})'.format(
                     self.config.get('LDAP_USER_OBJECT_FILTER'),
                     user_filter,
                 )
@@ -322,7 +322,7 @@ class LDAP3LoginManager(object):
                          len(connection.response) > 1):
                     # Don't allow them to log in.
                     log.error(
-                        "Could not gather extra info for user '{0}'".format(username))
+                        "Could not gather extra info for user '{}'".format(username))
                 else:
 
                     user = connection.response[0]
@@ -332,7 +332,7 @@ class LDAP3LoginManager(object):
 
         except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
             log.debug(
-                "Authentication was not successful for user '{0}'".format(username))
+                "Authentication was not successful for user '{}'".format(username))
             response.status = AuthenticationResponseStatus.fail
         except Exception as e:
             log.error(e)
@@ -372,7 +372,7 @@ class LDAP3LoginManager(object):
         try:
             connection.bind()
             log.debug(
-                "Authentication was successful for user '{0}'".format(username))
+                "Authentication was successful for user '{}'".format(username))
             response.status = AuthenticationResponseStatus.success
             # Get user info here.
 
@@ -387,7 +387,7 @@ class LDAP3LoginManager(object):
 
         except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
             log.debug(
-                "Authentication was not successful for user '{0}'".format(username))
+                "Authentication was not successful for user '{}'".format(username))
             response.status = AuthenticationResponseStatus.fail
         except Exception as e:
             log.error(e)
@@ -420,7 +420,7 @@ class LDAP3LoginManager(object):
 
         try:
             connection.bind()
-            log.debug("Successfully bound to LDAP as '{0}' for search_bind method".format(
+            log.debug("Successfully bound to LDAP as '{}' for search_bind method".format(
                 self.config.get('LDAP_BIND_USER_DN') or 'Anonymous'
             ))
         except Exception as e:
@@ -433,14 +433,14 @@ class LDAP3LoginManager(object):
             search_attr=self.config.get('LDAP_USER_LOGIN_ATTR'),
             username=username
         )
-        search_filter = '(&{0}{1})'.format(
+        search_filter = '(&{}{})'.format(
             self.config.get('LDAP_USER_OBJECT_FILTER'),
             user_filter,
         )
 
         log.debug(
-            "Performing an LDAP Search using filter '{0}', base '{1}', "
-            "and scope '{2}'".format(
+            "Performing an LDAP Search using filter '{}', base '{}', "
+            "and scope '{}'".format(
                 search_filter,
                 self.full_user_search_dn,
                 self.config.get('LDAP_USER_SEARCH_SCOPE')
@@ -461,7 +461,7 @@ class LDAP3LoginManager(object):
                  len(connection.response) > 1):
             # Don't allow them to log in.
             log.debug(
-                "Authentication was not successful for user '{0}'".format(username))
+                "Authentication was not successful for user '{}'".format(username))
 
         else:
             for user in connection.response:
@@ -479,11 +479,11 @@ class LDAP3LoginManager(object):
 
                 log.debug(
                     "Directly binding a connection to a server with "
-                    "user:'{0}'".format(user['dn']))
+                    "user:'{}'".format(user['dn']))
                 try:
                     user_connection.bind()
                     log.debug(
-                        "Authentication was successful for user '{0}'".format(username))
+                        "Authentication was successful for user '{}'".format(username))
                     response.status = AuthenticationResponseStatus.success
 
                     # Populate User Data
@@ -500,7 +500,7 @@ class LDAP3LoginManager(object):
                 except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
                     log.debug(
                         "Authentication was not successful for "
-                        "user '{0}'".format(username))
+                        "user '{}'".format(username))
                     response.status = AuthenticationResponseStatus.fail
                 except Exception as e:  # pragma: no cover
                     # This should never happen, however in case ldap3 does ever
@@ -545,8 +545,8 @@ class LDAP3LoginManager(object):
         )
 
         log.debug(
-            "Searching for groups for specific user with filter '{0}' "
-            ", base '{1}' and scope '{2}'".format(
+            "Searching for groups for specific user with filter '{}' "
+            ", base '{}' and scope '{}'".format(
                 search_filter,
                 group_search_dn or self.full_group_search_dn,
                 self.config.get('LDAP_GROUP_SEARCH_SCOPE')
@@ -612,7 +612,7 @@ class LDAP3LoginManager(object):
         Returns:
             dict: A dictionary of the user info from LDAP
         """
-        ldap_filter = '(&({0}={1}){2})'.format(
+        ldap_filter = '(&({}={}){})'.format(
             self.config.get('LDAP_USER_LOGIN_ATTR'),
             username,
             self.config.get('LDAP_USER_OBJECT_FILTER')
@@ -764,7 +764,7 @@ class LDAP3LoginManager(object):
             authentication = getattr(ldap3, self.config.get(
                 'LDAP_BIND_AUTHENTICATION_TYPE'))
 
-        log.debug("Opening connection with bind user '{0}'".format(
+        log.debug("Opening connection with bind user '{}'".format(
             bind_user or 'Anonymous'))
         connection = ldap3.Connection(
             server=self._server_pool,
@@ -791,7 +791,7 @@ class LDAP3LoginManager(object):
             connection (ldap3.Connection):  The connnection to destroy
         """
 
-        log.debug("Destroying connection at <{0}>".format(hex(id(connection))))
+        log.debug("Destroying connection at <{}>".format(hex(id(connection))))
         self._decontextualise_connection(connection)
         connection.unbind()
 
