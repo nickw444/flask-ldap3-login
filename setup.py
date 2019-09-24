@@ -32,11 +32,12 @@ setup(
     packages=['flask_ldap3_login'],
     author="Nick Whyte",
     author_email='nick@nickwhyte.com',
-    description="LDAP Support for Flask in Python3/2",
+    description="LDAP Support for Flask",
     long_description=long_description,
     url='https://github.com/nickw444/flask-ldap3-login',
     zip_safe=False,
     install_requires=requires,
+    python_requires='>=3.5',
     classifiers=[
         'Intended Audience :: Developers',
         'Programming Language :: Python',
