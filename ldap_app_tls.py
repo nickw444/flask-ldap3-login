@@ -52,7 +52,7 @@ tls_ctx = Tls(
     validate=ssl.CERT_REQUIRED,
     version=ssl.PROTOCOL_TLSv1,
     ca_certs_file="/path/to/cacerts",
-    valid_names=["ad.mydomain.com",],
+    valid_names=["ad.mydomain.com"],
 )
 
 ldap_manager.add_server(

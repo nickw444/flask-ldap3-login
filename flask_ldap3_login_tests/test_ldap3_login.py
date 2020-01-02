@@ -51,7 +51,7 @@ class AuthenticateDirectTestCase(BaseTestCase):
         super().setUp()
 
         self.manager.config.update(
-            {"LDAP_USER_RDN_ATTR": "cn", "LDAP_USER_LOGIN_ATTR": "cn",}
+            {"LDAP_USER_RDN_ATTR": "cn", "LDAP_USER_LOGIN_ATTR": "cn"}
         )
 
     def tearDown(self):
@@ -216,7 +216,7 @@ class AuthenticateSearchTestCase(BaseTestCase):
         super().setUp()
 
         self.manager.config.update(
-            {"LDAP_USER_RDN_ATTR": "cn", "LDAP_USER_LOGIN_ATTR": "mail",}
+            {"LDAP_USER_RDN_ATTR": "cn", "LDAP_USER_LOGIN_ATTR": "mail"}
         )
 
     def tearDown(self):
@@ -278,7 +278,7 @@ class LDAPLoginFormTestCase(BaseTestCase):
 class FailOnMultipleFoundTestCase(BaseTestCase):
     def test_ambiguious_login_field(self):
         self.manager.config.update(
-            {"LDAP_USER_RDN_ATTR": "cn", "LDAP_USER_LOGIN_ATTR": "objectclass",}
+            {"LDAP_USER_RDN_ATTR": "cn", "LDAP_USER_LOGIN_ATTR": "objectclass"}
         )
 
         r = self.manager.authenticate("person", "fake123")
