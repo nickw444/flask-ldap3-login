@@ -63,7 +63,7 @@ def build_comparison(cmp_string):
 class Server(mock.MagicMock):
     def __init__(self, hostname, port=None, use_ssl=None, tls=None):
         mock.MagicMock.__init__(self)
-        self.hostname = hostname
+        self.host = hostname
         self.port = port
         self.use_ssl = use_ssl
         self.tls = tls

@@ -19,28 +19,28 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 
+BASE_CONFIG = {
+    "LDAP_HOST": "ad.mydomain.com",
+    "LDAP_BASE_DN": "dc=mydomain,dc=com",
+    "LDAP_USER_DN": "ou=users",
+    "LDAP_GROUP_DN": "ou=groups",
+    "LDAP_BIND_USER_DN": "cn=Bind,dc=mydomain,dc=com",
+    "LDAP_BIND_USER_PASSWORD": "bind123",
+    "LDAP_USER_RDN_ATTR": "uid",
+    "LDAP_USER_LOGIN_ATTR": "mail",
+    "SECRET_KEY": "secrets",
+    "WTF_CSRF_ENABLED": False,
+}
+
+
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
         app = flask.Flask(__name__)
-        app.config["LDAP_HOST"] = "ad.mydomain.com"
-        app.config["LDAP_BASE_DN"] = "dc=mydomain,dc=com"
-        app.config["LDAP_USER_DN"] = "ou=users"
-        app.config["LDAP_GROUP_DN"] = "ou=groups"
-        app.config["LDAP_BIND_USER_DN"] = "cn=Bind,dc=mydomain,dc=com"
-        app.config["LDAP_BIND_USER_PASSWORD"] = "bind123"
-        app.config["LDAP_USER_RDN_ATTR"] = "uid"
-        app.config["LDAP_USER_LOGIN_ATTR"] = "mail"
-        app.config["SECRET_KEY"] = "secrets"
-        app.config["WTF_CSRF_ENABLED"] = False
+        app.config.update(BASE_CONFIG)
 
         self.app = app
         ldap3_manager = ldap3_login.LDAP3LoginManager(app)
         self.manager = ldap3_manager
-
-        pass
-
-    def tearDown(self):
-        pass
 
 
 @mock.patch("ldap3.ServerPool", new=ServerPool)
@@ -50,11 +50,15 @@ class AuthenticateDirectTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-        self.manager.config.update(
+        self.app.config.update(
             {"LDAP_USER_RDN_ATTR": "cn", "LDAP_USER_LOGIN_ATTR": "cn"}
         )
 
+        self.app.app_context().push()
+
     def tearDown(self):
+        stack.top.pop()
+
         super().tearDown()
 
     def test_login(self):
@@ -96,7 +100,7 @@ class DirectBindPrefixTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-        self.manager.config.update(
+        self.app.config.update(
             {
                 "LDAP_USER_RDN_ATTR": "cn",
                 "LDAP_USER_LOGIN_ATTR": "cn",
@@ -104,6 +108,11 @@ class DirectBindPrefixTestCase(BaseTestCase):
                 "LDAP_BIND_DIRECT_PREFIX": "MY_COOL_DOMAIN\\",
             }
         )
+        self.app.app_context().push()
+
+    def tearDown(self):
+        stack.top.pop()
+        super().tearDown()
 
     def test_login(self):
         r = self.manager.authenticate("janecitizen", "fake321")
@@ -119,7 +128,7 @@ class DirectBindSuffixTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-        self.manager.config.update(
+        self.app.config.update(
             {
                 "LDAP_USER_RDN_ATTR": "cn",
                 "LDAP_USER_LOGIN_ATTR": "cn",
@@ -127,6 +136,11 @@ class DirectBindSuffixTestCase(BaseTestCase):
                 "LDAP_BIND_DIRECT_SUFFIX": "@mycooldomain.com",
             }
         )
+        self.app.app_context().push()
+
+    def tearDown(self):
+        stack.top.pop()
+        super().tearDown()
 
     def test_login(self):
         r = self.manager.authenticate("janecitizen", "fake321")
@@ -142,7 +156,7 @@ class EmptyUserGroupDNTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-        self.manager.config.update(
+        self.app.config.update(
             {
                 "LDAP_USER_RDN_ATTR": "cn",
                 "LDAP_USER_LOGIN_ATTR": "cn",
@@ -151,6 +165,11 @@ class EmptyUserGroupDNTestCase(BaseTestCase):
                 "LDAP_GROUP_DN": "",
             }
         )
+        self.app.app_context().push()
+
+    def tearDown(self):
+        stack.top.pop()
+        super().tearDown()
 
     def test_login(self):
         r = self.manager.authenticate("Nick Whyte", "fake123")
@@ -180,13 +199,14 @@ class BadServerAddressTestCase(BaseTestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager(app)
         self.manager = ldap3_manager
 
-        self.manager.config.update(
-            {
-                "LDAP_USER_RDN_ATTR": "cn",
-                "LDAP_USER_LOGIN_ATTR": "cn",
-                "LDAP_HOST": "ad2.mydomain.com",
-            }
+        self.app.config.update(
+            {"LDAP_USER_RDN_ATTR": "cn", "LDAP_USER_LOGIN_ATTR": "cn"}
         )
+        self.app.app_context().push()
+
+    def tearDown(self):
+        stack.top.pop()
+        super().tearDown()
 
     def test_direct_bind_with_bad_server(self):
         r = self.manager.authenticate("Nick Whyte", "fake123")
@@ -195,7 +215,7 @@ class BadServerAddressTestCase(BaseTestCase):
         self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.fail)
 
     def test_search_bind_with_bad_server(self):
-        self.manager.config.update(
+        self.app.config.update(
             {
                 "LDAP_USER_RDN_ATTR": "cn",
                 "LDAP_USER_LOGIN_ATTR": "mail",
@@ -215,11 +235,13 @@ class AuthenticateSearchTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-        self.manager.config.update(
+        self.app.config.update(
             {"LDAP_USER_RDN_ATTR": "cn", "LDAP_USER_LOGIN_ATTR": "mail"}
         )
+        self.app.app_context().push()
 
     def tearDown(self):
+        stack.top.pop()
         super().tearDown()
 
     def test_login(self):
@@ -276,8 +298,16 @@ class LDAPLoginFormTestCase(BaseTestCase):
 @mock.patch("ldap3.Server", new=Server)
 @mock.patch("ldap3.Connection", new=Connection)
 class FailOnMultipleFoundTestCase(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.app.app_context().push()
+
+    def tearDown(self):
+        stack.top.pop()
+        super().tearDown()
+
     def test_ambiguious_login_field(self):
-        self.manager.config.update(
+        self.app.config.update(
             {"LDAP_USER_RDN_ATTR": "cn", "LDAP_USER_LOGIN_ATTR": "objectclass"}
         )
 
@@ -286,7 +316,7 @@ class FailOnMultipleFoundTestCase(BaseTestCase):
         r = self.manager.authenticate("person", "fake321")
         self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.success)
 
-        self.manager.config.update({"LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND": True})
+        self.app.config.update({"LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND": True})
         r = self.manager.authenticate("person", "fake123")
         self.assertEqual(r.status, ldap3_login.AuthenticationResponseStatus.fail)
         r = self.manager.authenticate("person", "fake321")
@@ -299,8 +329,10 @@ class FailOnMultipleFoundTestCase(BaseTestCase):
 class GroupMembershipTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
+        self.app.app_context().push()
 
     def tearDown(self):
+        stack.top.pop()
         super().tearDown()
 
     def test_group_membership(self):
@@ -324,6 +356,14 @@ class GroupMembershipTestCase(BaseTestCase):
 @mock.patch("ldap3.Server", new=Server)
 @mock.patch("ldap3.Connection", new=Connection)
 class GetUserInfoTestCase(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.app.app_context().push()
+
+    def tearDown(self):
+        stack.top.pop()
+        super().tearDown()
+
     def test_get_user_info_for_username(self):
         user = self.manager.get_user_info_for_username("nick@nickwhyte.com")
         self.assertEqual(
@@ -335,6 +375,14 @@ class GetUserInfoTestCase(BaseTestCase):
 @mock.patch("ldap3.Server", new=Server)
 @mock.patch("ldap3.Connection", new=Connection)
 class SpecialCharactersTestCase(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.app.app_context().push()
+
+    def tearDown(self):
+        stack.top.pop()
+        super().tearDown()
+
     def test_get_user_groups_special_characters(self):
         groups = self.manager.get_user_groups(
             dn="cn=Jane (admin),ou=users,dc=mydomain,dc=com"
@@ -350,8 +398,10 @@ class SpecialCharactersTestCase(BaseTestCase):
 class GroupExistsTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
+        self.app.app_context().push()
 
     def tearDown(self):
+        stack.top.pop()
         super().tearDown()
 
     def test_group_exists(self):
@@ -397,21 +447,24 @@ class SessionContextTextCase(BaseTestCase):
             self.assertFalse(hasattr(stack.top, "ldap3_manager_connections"))
 
 
-class AppFactoryTestCase(BaseTestCase):
+@mock.patch("ldap3.ServerPool", new=ServerPool)
+@mock.patch("ldap3.Server", new=Server)
+@mock.patch("ldap3.Connection", new=Connection)
+class AppFactoryTestCase(unittest.TestCase):
     """
     Tests whether the popular Flask app factory pattern can be used.
     """
 
     def test_server_pool(self):
-        """
-        To support the app factory pattern, the server pool must be reset when
-        init_app is called.
-        The test is executed 10 times because if you e.g. run unit tests you
-        likely reinitialize the app many times.
-        """
-        for i in range(10):
-            self.manager.init_app(self.app)
-            self.assertEqual(len(list(self.manager._server_pool)), 1)
+        manager = ldap3_login.LDAP3LoginManager()
+
+        for _ in range(10):
+            app = flask.Flask(__name__)
+            app.config.update(BASE_CONFIG)
+            manager.init_app(app)
+            with app.test_request_context():
+                manager.connection
+            self.assertEqual(len(list(app.ldap3_login_manager_server_pool)), 1)
 
 
 class LDAPAddServerConfigTestCase(BaseTestCase):
@@ -437,7 +490,7 @@ class LDAPAddServerConfigTestCase(BaseTestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_app(self.app)
 
-        self.assertEqual(len(list(ldap3_manager._server_pool)), 1)
+        self.assertEqual(len(list(self.app.ldap3_login_manager_server_pool)), 1)
 
     def test_server_added_when_true(self):
         """
@@ -449,7 +502,7 @@ class LDAPAddServerConfigTestCase(BaseTestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_app(self.app)
 
-        self.assertEqual(len(list(ldap3_manager._server_pool)), 1)
+        self.assertEqual(len(list(self.app.ldap3_login_manager_server_pool)), 1)
 
     def test_server_added_when_false(self):
         """
@@ -461,7 +514,7 @@ class LDAPAddServerConfigTestCase(BaseTestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         ldap3_manager.init_app(self.app)
 
-        self.assertEqual(len(list(ldap3_manager._server_pool)), 0)
+        self.assertEqual(len(list(self.app.ldap3_login_manager_server_pool)), 0)
 
 
 class AddServerTestCase(BaseTestCase):
@@ -492,7 +545,7 @@ class AddServerTestCase(BaseTestCase):
 
         def add_server():
             return ldap3_manager.add_server(
-                "ad2.mydomain.com", 389, use_ssl=False, tls_ctx=object()
+                "ad2.mydomain.com", 389, use_ssl=False, tls_ctx=object(), app=self.app
             )
 
         self.assertRaises(ValueError, add_server)
@@ -507,11 +560,13 @@ class AddServerTestCase(BaseTestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         self.app.config.update(AddServerTestCase.DEFAULT_CONFIG)
         ldap3_manager.init_app(self.app)
-        ldap3_manager.add_server("ad2.mydomain.com", 389, use_ssl=False, tls_ctx=None)
+        ldap3_manager.add_server(
+            "ad2.mydomain.com", 389, use_ssl=False, tls_ctx=None, app=self.app
+        )
 
-        self.assertEqual(len(ldap3_manager._server_pool.servers), 1)
+        self.assertEqual(len(self.app.ldap3_login_manager_server_pool.servers), 1)
 
-        server = ldap3_manager._server_pool.servers[-1]
+        server = self.app.ldap3_login_manager_server_pool.servers[-1]
         self.assertEqual(server.tls, None)
         self.assertFalse(server.use_ssl)
 
@@ -525,11 +580,13 @@ class AddServerTestCase(BaseTestCase):
         ldap3_manager = ldap3_login.LDAP3LoginManager()
         self.app.config.update(AddServerTestCase.DEFAULT_CONFIG)
         ldap3_manager.init_app(self.app)
-        ldap3_manager.add_server("ad2.mydomain.com", 389, use_ssl=True, tls_ctx=None)
+        ldap3_manager.add_server(
+            "ad2.mydomain.com", 389, use_ssl=True, tls_ctx=None, app=self.app
+        )
 
-        self.assertEqual(len(ldap3_manager._server_pool.servers), 1)
+        self.assertEqual(len(self.app.ldap3_login_manager_server_pool.servers), 1)
 
-        server = ldap3_manager._server_pool.servers[-1]
+        server = self.app.ldap3_login_manager_server_pool.servers[-1]
         self.assertEqual(server.tls, None)
         self.assertTrue(server.use_ssl)
 
@@ -546,12 +603,12 @@ class AddServerTestCase(BaseTestCase):
         self.app.config.update(AddServerTestCase.DEFAULT_CONFIG)
         ldap3_manager.init_app(self.app)
         ldap3_manager.add_server(
-            "ad2.mydomain.com", 389, use_ssl=True, tls_ctx=fake_tls_ctx
+            "ad2.mydomain.com", 389, use_ssl=True, tls_ctx=fake_tls_ctx, app=self.app
         )
 
-        self.assertEqual(len(ldap3_manager._server_pool.servers), 1)
+        self.assertEqual(len(self.app.ldap3_login_manager_server_pool.servers), 1)
 
-        server = ldap3_manager._server_pool.servers[-1]
+        server = self.app.ldap3_login_manager_server_pool.servers[-1]
         self.assertEqual(server.tls, fake_tls_ctx)
         self.assertTrue(server.use_ssl)
 
@@ -559,6 +616,14 @@ class AddServerTestCase(BaseTestCase):
 @mock.patch("ldap3.ServerPool", new=ServerPool)
 @mock.patch("ldap3.Server", new=Server)
 class LdapCheckNamesTestCase(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.app.app_context().push()
+
+    def tearDown(self):
+        stack.top.pop()
+        super().tearDown()
+
     @mock.patch("ldap3.Connection")
     def test_check_names_default(self, connection):
         self.manager.authenticate("janecitizen", "fake321")
@@ -567,14 +632,14 @@ class LdapCheckNamesTestCase(BaseTestCase):
 
     @mock.patch("ldap3.Connection")
     def test_check_names_true(self, connection):
-        self.manager.config.update({"LDAP_CHECK_NAMES": True})
+        self.app.config.update({"LDAP_CHECK_NAMES": True})
         self.manager.authenticate("janecitizen", "fake321")
         connection.assert_called_once()
         self.assertEqual(connection.call_args[1]["check_names"], True)
 
     @mock.patch("ldap3.Connection")
     def test_check_names_false(self, connection):
-        self.manager.config.update({"LDAP_CHECK_NAMES": False})
+        self.app.config.update({"LDAP_CHECK_NAMES": False})
         self.manager.authenticate("janecitizen", "fake321")
         connection.assert_called_once()
         self.assertEqual(connection.call_args[1]["check_names"], False)
