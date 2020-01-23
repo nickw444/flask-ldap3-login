@@ -5,38 +5,38 @@ from flask import render_template_string, redirect
 from flask_ldap3_login.forms import LDAPLoginForm
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret'
-app.config['DEBUG'] = True
+app.config["SECRET_KEY"] = "secret"
+app.config["DEBUG"] = True
 
 # Setup LDAP Configuration Variables. Change these to your own settings.
 # All configuration directives can be found in the documentation.
 
 # Hostname of your LDAP Server
-app.config['LDAP_HOST'] = 'ad.mydomain.com'
+app.config["LDAP_HOST"] = "ad.mydomain.com"
 
 # Base DN of your directory
-app.config['LDAP_BASE_DN'] = 'dc=mydomain,dc=com'
+app.config["LDAP_BASE_DN"] = "dc=mydomain,dc=com"
 
 # Users DN to be prepended to the Base DN
-app.config['LDAP_USER_DN'] = 'ou=users'
+app.config["LDAP_USER_DN"] = "ou=users"
 
 # Groups DN to be prepended to the Base DN
-app.config['LDAP_GROUP_DN'] = 'ou=groups'
+app.config["LDAP_GROUP_DN"] = "ou=groups"
 
 # The RDN attribute for your user schema on LDAP
-app.config['LDAP_USER_RDN_ATTR'] = 'cn'
+app.config["LDAP_USER_RDN_ATTR"] = "cn"
 
 # The Attribute you want users to authenticate to LDAP with.
-app.config['LDAP_USER_LOGIN_ATTR'] = 'mail'
+app.config["LDAP_USER_LOGIN_ATTR"] = "mail"
 
 # The Username to bind to LDAP with
-app.config['LDAP_BIND_USER_DN'] = None
+app.config["LDAP_BIND_USER_DN"] = None
 
 # The Password to bind to LDAP with
-app.config['LDAP_BIND_USER_PASSWORD'] = None
+app.config["LDAP_BIND_USER_PASSWORD"] = None
 
-login_manager = LoginManager(app)              # Setup a Flask-Login Manager
-ldap_manager = LDAP3LoginManager(app)          # Setup a LDAP3 Login Manager.
+login_manager = LoginManager(app)  # Setup a Flask-Login Manager
+ldap_manager = LDAP3LoginManager(app)  # Setup a LDAP3 Login Manager.
 
 # Create a dictionary to store the users in when they authenticate
 # This example stores users in memory.
@@ -80,11 +80,11 @@ def save_user(dn, username, data, memberships):
 
 
 # Declare some routes for usage to show the authentication process.
-@app.route('/')
+@app.route("/")
 def home():
     # Redirect users who are not logged in.
     if not current_user or current_user.is_anonymous:
-        return redirect(url_for('login'))
+        return redirect(url_for("login"))
 
     # User is logged in, so show them a page with their cn and dn.
     template = """
@@ -95,16 +95,16 @@ def home():
     return render_template_string(template)
 
 
-@app.route('/manual_login')
+@app.route("/manual_login")
 def manual_login():
     # Instead of using the form, you can alternatively authenticate
     # using the authenticate method.
     # This WILL NOT fire the save_user() callback defined above.
     # You are responsible for saving your users.
-    app.ldap3_login_manager.authenticate('username', 'password')
+    app.ldap3_login_manager.authenticate("username", "password")
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
     template = """
     {{ get_flashed_messages() }}
@@ -125,10 +125,10 @@ def login():
         # Successfully logged in, We can now access the saved user object
         # via form.user.
         login_user(form.user)  # Tell flask-login to log them in.
-        return redirect('/')  # Send them home
+        return redirect("/")  # Send them home
 
     return render_template_string(template, form=form)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run()

@@ -11,46 +11,41 @@ from enum import Enum
 
 log = logging.getLogger(__name__)
 
-AuthenticationResponseStatus = Enum(
-    'AuthenticationResponseStatus', 'fail success')
+AuthenticationResponseStatus = Enum("AuthenticationResponseStatus", "fail success")
 
 
 _CONFIG_DEFAULTS = [
-    ('LDAP_PORT', 389),
-    ('LDAP_HOST', None),
-    ('LDAP_USE_SSL', False),
-    ('LDAP_READONLY', True),
-    ('LDAP_CHECK_NAMES', True),
-    ('LDAP_BIND_DIRECT_CREDENTIALS', False),
-    ('LDAP_BIND_DIRECT_PREFIX', ''),
-    ('LDAP_BIND_DIRECT_SUFFIX', ''),
-    ('LDAP_BIND_DIRECT_GET_USER_INFO', True),
-    ('LDAP_ALWAYS_SEARCH_BIND', False),
-    ('LDAP_BASE_DN', ''),
-    ('LDAP_BIND_USER_DN', None),
-    ('LDAP_BIND_USER_PASSWORD', None),
-    ('LDAP_SEARCH_FOR_GROUPS', True),
-    ('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND', False),
-
+    ("LDAP_PORT", 389),
+    ("LDAP_HOST", None),
+    ("LDAP_USE_SSL", False),
+    ("LDAP_READONLY", True),
+    ("LDAP_CHECK_NAMES", True),
+    ("LDAP_BIND_DIRECT_CREDENTIALS", False),
+    ("LDAP_BIND_DIRECT_PREFIX", ""),
+    ("LDAP_BIND_DIRECT_SUFFIX", ""),
+    ("LDAP_BIND_DIRECT_GET_USER_INFO", True),
+    ("LDAP_ALWAYS_SEARCH_BIND", False),
+    ("LDAP_BASE_DN", ""),
+    ("LDAP_BIND_USER_DN", None),
+    ("LDAP_BIND_USER_PASSWORD", None),
+    ("LDAP_SEARCH_FOR_GROUPS", True),
+    ("LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND", False),
     # Prepended to the Base DN to limit scope when searching for
     # Users/Groups.
-    ('LDAP_USER_DN', ''),
-    ('LDAP_GROUP_DN', ''),
-
-    ('LDAP_BIND_AUTHENTICATION_TYPE', 'SIMPLE'),
-
+    ("LDAP_USER_DN", ""),
+    ("LDAP_GROUP_DN", ""),
+    ("LDAP_BIND_AUTHENTICATION_TYPE", "SIMPLE"),
     # Ldap Filters
-    ('LDAP_USER_SEARCH_SCOPE', 'LEVEL'),
-    ('LDAP_USER_OBJECT_FILTER', '(objectclass=person)'),
-    ('LDAP_USER_LOGIN_ATTR', 'uid'),
-    ('LDAP_USER_RDN_ATTR', 'uid'),
-    ('LDAP_GET_USER_ATTRIBUTES', ldap3.ALL_ATTRIBUTES),
-
-    ('LDAP_GROUP_SEARCH_SCOPE', 'LEVEL'),
-    ('LDAP_GROUP_OBJECT_FILTER', '(objectclass=group)'),
-    ('LDAP_GROUP_MEMBERS_ATTR', 'uniqueMember'),
-    ('LDAP_GET_GROUP_ATTRIBUTES', ldap3.ALL_ATTRIBUTES),
-    ('LDAP_ADD_SERVER', True),
+    ("LDAP_USER_SEARCH_SCOPE", "LEVEL"),
+    ("LDAP_USER_OBJECT_FILTER", "(objectclass=person)"),
+    ("LDAP_USER_LOGIN_ATTR", "uid"),
+    ("LDAP_USER_RDN_ATTR", "uid"),
+    ("LDAP_GET_USER_ATTRIBUTES", ldap3.ALL_ATTRIBUTES),
+    ("LDAP_GROUP_SEARCH_SCOPE", "LEVEL"),
+    ("LDAP_GROUP_OBJECT_FILTER", "(objectclass=group)"),
+    ("LDAP_GROUP_MEMBERS_ATTR", "uniqueMember"),
+    ("LDAP_GET_GROUP_ATTRIBUTES", ldap3.ALL_ATTRIBUTES),
+    ("LDAP_ADD_SERVER", True),
 ]
 
 
@@ -67,11 +62,17 @@ class AuthenticationResponse:
         user_groups (list): A list containing a dicts of group info.
     """
 
-    def __init__(self, status=AuthenticationResponseStatus.fail,
-                 user_info=None, user_id=None, user_dn=None, user_groups=[]):
-        self.user_info = user_info,
-        self.user_id = user_id,
-        self.user_dn = user_dn,
+    def __init__(
+        self,
+        status=AuthenticationResponseStatus.fail,
+        user_info=None,
+        user_id=None,
+        user_dn=None,
+        user_groups=[],
+    ):
+        self.user_info = (user_info,)
+        self.user_id = (user_id,)
+        self.user_dn = (user_dn,)
         self.user_groups = user_groups
         self.status = status
 
@@ -100,14 +101,14 @@ class LDAP3LoginManager:
             self.init_app(app)
 
     def init_app(self, app):
-        '''
+        """
         Configures this extension with the given app. This registers an
         ``teardown_appcontext`` call, and attaches this ``LDAP3LoginManager``
         to it as ``app.ldap3_login_manager``.
 
         Args:
             app (flask.Flask): The flask app to initialise with
-        '''
+        """
 
         app.ldap3_login_manager = self
 
@@ -117,14 +118,14 @@ class LDAP3LoginManager:
 
         self.config.update(app.config)
 
-        if self.config['LDAP_ADD_SERVER']:
+        if self.config["LDAP_ADD_SERVER"]:
             self.add_server(
-                hostname=self.config['LDAP_HOST'],
-                port=self.config['LDAP_PORT'],
-                use_ssl=self.config['LDAP_USE_SSL']
+                hostname=self.config["LDAP_HOST"],
+                port=self.config["LDAP_PORT"],
+                use_ssl=self.config["LDAP_USE_SSL"],
             )
 
-        if hasattr(app, 'teardown_appcontext'):
+        if hasattr(app, "teardown_appcontext"):
             app.teardown_appcontext(self.teardown)
         else:  # pragma: no cover
             app.teardown_request(self.teardown)
@@ -148,12 +149,7 @@ class LDAP3LoginManager:
         """
         if not use_ssl and tls_ctx:
             raise ValueError("Cannot specify a TLS context and not use SSL!")
-        server = ldap3.Server(
-            hostname,
-            port=port,
-            use_ssl=use_ssl,
-            tls=tls_ctx
-        )
+        server = ldap3.Server(hostname, port=port, use_ssl=use_ssl, tls=tls_ctx)
         self._server_pool.add(server)
         return server
 
@@ -169,7 +165,7 @@ class LDAP3LoginManager:
 
         ctx = stack.top
         if ctx is not None:
-            if not hasattr(ctx, 'ldap3_manager_connections'):
+            if not hasattr(ctx, "ldap3_manager_connections"):
                 ctx.ldap3_manager_connections = [connection]
             else:
                 ctx.ldap3_manager_connections.append(connection)
@@ -195,17 +191,16 @@ class LDAP3LoginManager:
 
         ctx = stack.top
         if ctx is not None:
-            if hasattr(ctx, 'ldap3_manager_connections'):
+            if hasattr(ctx, "ldap3_manager_connections"):
                 for connection in ctx.ldap3_manager_connections:
                     self.destroy_connection(connection)
-            if hasattr(ctx, 'ldap3_manager_main_connection'):
-                log.debug(
-                    "Unbinding a connection used within the request context.")
+            if hasattr(ctx, "ldap3_manager_main_connection"):
+                log.debug("Unbinding a connection used within the request context.")
                 ctx.ldap3_manager_main_connection.unbind()
                 ctx.ldap3_manager_main_connection = None
 
     def save_user(self, callback):
-        '''
+        """
         This sets the callback for saving a user that has been looked up from
         from ldap.
 
@@ -225,7 +220,7 @@ class LDAP3LoginManager:
         Args:
             callback (function): The function to be used as the save user
                                  callback.
-        '''
+        """
 
         self._save_user = callback
         return callback
@@ -244,12 +239,12 @@ class LDAP3LoginManager:
             AuthenticationResponse
 
         """
-        if self.config.get('LDAP_BIND_DIRECT_CREDENTIALS'):
+        if self.config.get("LDAP_BIND_DIRECT_CREDENTIALS"):
             result = self.authenticate_direct_credentials(username, password)
 
-        elif not self.config.get('LDAP_ALWAYS_SEARCH_BIND') and \
-                self.config.get('LDAP_USER_RDN_ATTR') == \
-                self.config.get('LDAP_USER_LOGIN_ATTR'):
+        elif not self.config.get("LDAP_ALWAYS_SEARCH_BIND") and self.config.get(
+            "LDAP_USER_RDN_ATTR"
+        ) == self.config.get("LDAP_USER_LOGIN_ATTR"):
             # Since the user's RDN is the same as the login field,
             # we can do a direct bind.
             result = self.authenticate_direct_bind(username, password)
@@ -280,59 +275,58 @@ class LDAP3LoginManager:
             AuthenticationResponse
         """
 
-        bind_user = '{}{}{}'.format(
-            self.config.get('LDAP_BIND_DIRECT_PREFIX'),
+        bind_user = "{}{}{}".format(
+            self.config.get("LDAP_BIND_DIRECT_PREFIX"),
             username,
-            self.config.get('LDAP_BIND_DIRECT_SUFFIX')
+            self.config.get("LDAP_BIND_DIRECT_SUFFIX"),
         )
-        connection = self._make_connection(
-            bind_user=bind_user,
-            bind_password=password,
-        )
+        connection = self._make_connection(bind_user=bind_user, bind_password=password,)
 
         response = AuthenticationResponse()
         try:
             connection.bind()
             response.status = AuthenticationResponseStatus.success
             response.user_id = username
-            log.debug(
-                "Authentication was successful for user '{}'".format(username))
+            log.debug("Authentication was successful for user '{}'".format(username))
 
-            if self.config.get('LDAP_BIND_DIRECT_GET_USER_INFO'):
+            if self.config.get("LDAP_BIND_DIRECT_GET_USER_INFO"):
                 # User wants extra info about the bind
-                user_filter = '({search_attr}={username})'.format(
-                    search_attr=self.config.get('LDAP_USER_LOGIN_ATTR'),
-                    username=username
+                user_filter = "({search_attr}={username})".format(
+                    search_attr=self.config.get("LDAP_USER_LOGIN_ATTR"),
+                    username=username,
                 )
-                search_filter = '(&{}{})'.format(
-                    self.config.get('LDAP_USER_OBJECT_FILTER'),
-                    user_filter,
+                search_filter = "(&{}{})".format(
+                    self.config.get("LDAP_USER_OBJECT_FILTER"), user_filter,
                 )
 
                 connection.search(
                     search_base=self.full_user_search_dn,
                     search_filter=search_filter,
                     search_scope=getattr(
-                        ldap3, self.config.get('LDAP_USER_SEARCH_SCOPE')),
-                    attributes=self.config.get('LDAP_GET_USER_ATTRIBUTES'),
+                        ldap3, self.config.get("LDAP_USER_SEARCH_SCOPE")
+                    ),
+                    attributes=self.config.get("LDAP_GET_USER_ATTRIBUTES"),
                 )
 
-                if len(connection.response) == 0 or \
-                        (self.config.get('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND') and
-                         len(connection.response) > 1):
+                if len(connection.response) == 0 or (
+                    self.config.get("LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND")
+                    and len(connection.response) > 1
+                ):
                     # Don't allow them to log in.
                     log.error(
-                        "Could not gather extra info for user '{}'".format(username))
+                        "Could not gather extra info for user '{}'".format(username)
+                    )
                 else:
 
                     user = connection.response[0]
-                    user['attributes']['dn'] = user['dn']
-                    response.user_info = user['attributes']
-                    response.user_dn = user['dn']
+                    user["attributes"]["dn"] = user["dn"]
+                    response.user_info = user["attributes"]
+                    response.user_dn = user["dn"]
 
         except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
             log.debug(
-                "Authentication was not successful for user '{}'".format(username))
+                "Authentication was not successful for user '{}'".format(username)
+            )
             response.status = AuthenticationResponseStatus.fail
         except Exception as e:
             log.error(e)
@@ -356,38 +350,35 @@ class LDAP3LoginManager:
             AuthenticationResponse
         """
 
-        bind_user = '{rdn}={username},{user_search_dn}'.format(
-            rdn=self.config.get('LDAP_USER_RDN_ATTR'),
+        bind_user = "{rdn}={username},{user_search_dn}".format(
+            rdn=self.config.get("LDAP_USER_RDN_ATTR"),
             username=username,
             user_search_dn=self.full_user_search_dn,
         )
 
-        connection = self._make_connection(
-            bind_user=bind_user,
-            bind_password=password,
-        )
+        connection = self._make_connection(bind_user=bind_user, bind_password=password,)
 
         response = AuthenticationResponse()
 
         try:
             connection.bind()
-            log.debug(
-                "Authentication was successful for user '{}'".format(username))
+            log.debug("Authentication was successful for user '{}'".format(username))
             response.status = AuthenticationResponseStatus.success
             # Get user info here.
 
-            user_info = self.get_user_info(
-                dn=bind_user, _connection=connection)
+            user_info = self.get_user_info(dn=bind_user, _connection=connection)
             response.user_dn = bind_user
             response.user_id = username
             response.user_info = user_info
-            if self.config.get('LDAP_SEARCH_FOR_GROUPS'):
+            if self.config.get("LDAP_SEARCH_FOR_GROUPS"):
                 response.user_groups = self.get_user_groups(
-                    dn=bind_user, _connection=connection)
+                    dn=bind_user, _connection=connection
+                )
 
         except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
             log.debug(
-                "Authentication was not successful for user '{}'".format(username))
+                "Authentication was not successful for user '{}'".format(username)
+            )
             response.status = AuthenticationResponseStatus.fail
         except Exception as e:
             log.error(e)
@@ -414,28 +405,28 @@ class LDAP3LoginManager:
 
         """
         connection = self._make_connection(
-            bind_user=self.config.get('LDAP_BIND_USER_DN'),
-            bind_password=self.config.get('LDAP_BIND_USER_PASSWORD'),
+            bind_user=self.config.get("LDAP_BIND_USER_DN"),
+            bind_password=self.config.get("LDAP_BIND_USER_PASSWORD"),
         )
 
         try:
             connection.bind()
-            log.debug("Successfully bound to LDAP as '{}' for search_bind method".format(
-                self.config.get('LDAP_BIND_USER_DN') or 'Anonymous'
-            ))
+            log.debug(
+                "Successfully bound to LDAP as '{}' for search_bind method".format(
+                    self.config.get("LDAP_BIND_USER_DN") or "Anonymous"
+                )
+            )
         except Exception as e:
             self.destroy_connection(connection)
             log.error(e)
             return AuthenticationResponse()
 
         # Find the user in the search path.
-        user_filter = '({search_attr}={username})'.format(
-            search_attr=self.config.get('LDAP_USER_LOGIN_ATTR'),
-            username=username
+        user_filter = "({search_attr}={username})".format(
+            search_attr=self.config.get("LDAP_USER_LOGIN_ATTR"), username=username
         )
-        search_filter = '(&{}{})'.format(
-            self.config.get('LDAP_USER_OBJECT_FILTER'),
-            user_filter,
+        search_filter = "(&{}{})".format(
+            self.config.get("LDAP_USER_OBJECT_FILTER"), user_filter,
         )
 
         log.debug(
@@ -443,64 +434,69 @@ class LDAP3LoginManager:
             "and scope '{}'".format(
                 search_filter,
                 self.full_user_search_dn,
-                self.config.get('LDAP_USER_SEARCH_SCOPE')
-            ))
+                self.config.get("LDAP_USER_SEARCH_SCOPE"),
+            )
+        )
 
         connection.search(
             search_base=self.full_user_search_dn,
             search_filter=search_filter,
-            search_scope=getattr(
-                ldap3, self.config.get('LDAP_USER_SEARCH_SCOPE')),
-            attributes=self.config.get('LDAP_GET_USER_ATTRIBUTES')
+            search_scope=getattr(ldap3, self.config.get("LDAP_USER_SEARCH_SCOPE")),
+            attributes=self.config.get("LDAP_GET_USER_ATTRIBUTES"),
         )
 
         response = AuthenticationResponse()
 
-        if len(connection.response) == 0 or \
-                (self.config.get('LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND') and
-                 len(connection.response) > 1):
+        if len(connection.response) == 0 or (
+            self.config.get("LDAP_FAIL_AUTH_ON_MULTIPLE_FOUND")
+            and len(connection.response) > 1
+        ):
             # Don't allow them to log in.
             log.debug(
-                "Authentication was not successful for user '{}'".format(username))
+                "Authentication was not successful for user '{}'".format(username)
+            )
 
         else:
             for user in connection.response:
                 # Attempt to bind with each user we find until we can find
                 # one that works.
 
-                if 'type' not in user or user.get('type') != 'searchResEntry':
+                if "type" not in user or user.get("type") != "searchResEntry":
                     # Issue #13 - Don't return non-entry results.
                     continue
 
                 user_connection = self._make_connection(
-                    bind_user=user['dn'],
-                    bind_password=password
+                    bind_user=user["dn"], bind_password=password
                 )
 
                 log.debug(
                     "Directly binding a connection to a server with "
-                    "user:'{}'".format(user['dn']))
+                    "user:'{}'".format(user["dn"])
+                )
                 try:
                     user_connection.bind()
                     log.debug(
-                        "Authentication was successful for user '{}'".format(username))
+                        "Authentication was successful for user '{}'".format(username)
+                    )
                     response.status = AuthenticationResponseStatus.success
 
                     # Populate User Data
-                    user['attributes']['dn'] = user['dn']
-                    response.user_info = user['attributes']
+                    user["attributes"]["dn"] = user["dn"]
+                    response.user_info = user["attributes"]
                     response.user_id = username
-                    response.user_dn = user['dn']
-                    if self.config.get('LDAP_SEARCH_FOR_GROUPS'):
+                    response.user_dn = user["dn"]
+                    if self.config.get("LDAP_SEARCH_FOR_GROUPS"):
                         response.user_groups = self.get_user_groups(
-                            dn=user['dn'], _connection=connection)
+                            dn=user["dn"], _connection=connection
+                        )
                     self.destroy_connection(user_connection)
                     break
 
                 except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
                     log.debug(
                         "Authentication was not successful for "
-                        "user '{}'".format(username))
+                        "user '{}'".format(username)
+                    )
                     response.status = AuthenticationResponseStatus.fail
                 except Exception as e:  # pragma: no cover
                     # This should never happen, however in case ldap3 does ever
@@ -532,16 +528,16 @@ class LDAP3LoginManager:
         connection = _connection
         if not connection:
             connection = self._make_connection(
-                bind_user=self.config.get('LDAP_BIND_USER_DN'),
-                bind_password=self.config.get('LDAP_BIND_USER_PASSWORD')
+                bind_user=self.config.get("LDAP_BIND_USER_DN"),
+                bind_password=self.config.get("LDAP_BIND_USER_PASSWORD"),
             )
             connection.bind()
 
         safe_dn = ldap3.utils.conv.escape_filter_chars(dn)
-        search_filter = '(&{group_filter}({members_attr}={user_dn}))'.format(
-            group_filter=self.config.get('LDAP_GROUP_OBJECT_FILTER'),
-            members_attr=self.config.get('LDAP_GROUP_MEMBERS_ATTR'),
-            user_dn=safe_dn
+        search_filter = "(&{group_filter}({members_attr}={user_dn}))".format(
+            group_filter=self.config.get("LDAP_GROUP_OBJECT_FILTER"),
+            members_attr=self.config.get("LDAP_GROUP_MEMBERS_ATTR"),
+            user_dn=safe_dn,
         )
 
         log.debug(
@@ -549,25 +545,25 @@ class LDAP3LoginManager:
             ", base '{}' and scope '{}'".format(
                 search_filter,
                 group_search_dn or self.full_group_search_dn,
-                self.config.get('LDAP_GROUP_SEARCH_SCOPE')
-            ))
+                self.config.get("LDAP_GROUP_SEARCH_SCOPE"),
+            )
+        )
 
         connection.search(
             search_base=group_search_dn or self.full_group_search_dn,
             search_filter=search_filter,
-            attributes=self.config.get('LDAP_GET_GROUP_ATTRIBUTES'),
-            search_scope=getattr(
-                ldap3, self.config.get('LDAP_GROUP_SEARCH_SCOPE'))
+            attributes=self.config.get("LDAP_GET_GROUP_ATTRIBUTES"),
+            search_scope=getattr(ldap3, self.config.get("LDAP_GROUP_SEARCH_SCOPE")),
         )
 
         results = []
         for item in connection.response:
-            if 'type' not in item or item.get('type') != 'searchResEntry':
+            if "type" not in item or item.get("type") != "searchResEntry":
                 # Issue #13 - Don't return non-entry results.
                 continue
 
-            group_data = item['attributes']
-            group_data['dn'] = item['dn']
+            group_data = item["attributes"]
+            group_data["dn"] = item["dn"]
             results.append(group_data)
 
         if not _connection:
@@ -592,7 +588,7 @@ class LDAP3LoginManager:
         """
         return self.get_object(
             dn=dn,
-            filter=self.config.get('LDAP_USER_OBJECT_FILTER'),
+            filter=self.config.get("LDAP_USER_OBJECT_FILTER"),
             attributes=self.config.get("LDAP_GET_USER_ATTRIBUTES"),
             _connection=_connection,
         )
@@ -612,10 +608,10 @@ class LDAP3LoginManager:
         Returns:
             dict: A dictionary of the user info from LDAP
         """
-        ldap_filter = '(&({}={}){})'.format(
-            self.config.get('LDAP_USER_LOGIN_ATTR'),
+        ldap_filter = "(&({}={}){})".format(
+            self.config.get("LDAP_USER_LOGIN_ATTR"),
             username,
-            self.config.get('LDAP_USER_OBJECT_FILTER')
+            self.config.get("LDAP_USER_OBJECT_FILTER"),
         )
 
         return self.get_object(
@@ -641,7 +637,7 @@ class LDAP3LoginManager:
 
         return self.get_object(
             dn=dn,
-            filter=self.config.get('LDAP_GROUP_OBJECT_FILTER'),
+            filter=self.config.get("LDAP_GROUP_OBJECT_FILTER"),
             attributes=self.config.get("LDAP_GET_GROUP_ATTRIBUTES"),
             _connection=_connection,
         )
@@ -665,21 +661,19 @@ class LDAP3LoginManager:
         connection = _connection
         if not connection:
             connection = self._make_connection(
-                bind_user=self.config.get('LDAP_BIND_USER_DN'),
-                bind_password=self.config.get('LDAP_BIND_USER_PASSWORD')
+                bind_user=self.config.get("LDAP_BIND_USER_DN"),
+                bind_password=self.config.get("LDAP_BIND_USER_PASSWORD"),
             )
             connection.bind()
 
         connection.search(
-            search_base=dn,
-            search_filter=filter,
-            attributes=attributes,
+            search_base=dn, search_filter=filter, attributes=attributes,
         )
 
         data = None
         if len(connection.response) > 0:
-            data = connection.response[0]['attributes']
-            data['dn'] = connection.response[0]['dn']
+            data = connection.response[0]["attributes"]
+            data["dn"] = connection.response[0]["dn"]
 
         if not _connection:
             # We made a connection, so we need to kill it.
@@ -703,18 +697,20 @@ class LDAP3LoginManager:
         """
         ctx = stack.top
         if ctx is None:
-            raise Exception("Working outside of the Flask application "
-                            "context. If you wish to make a connection outside of a flask"
-                            " application context, please handle your connections "
-                            "and use manager.make_connection()")
+            raise Exception(
+                "Working outside of the Flask application "
+                "context. If you wish to make a connection outside of a flask"
+                " application context, please handle your connections "
+                "and use manager.make_connection()"
+            )
 
-        if hasattr(ctx, 'ldap3_manager_main_connection'):
+        if hasattr(ctx, "ldap3_manager_main_connection"):
             return ctx.ldap3_manager_main_connection
         else:
             connection = self._make_connection(
-                bind_user=self.config.get('LDAP_BIND_USER_DN'),
-                bind_password=self.config.get('LDAP_BIND_USER_PASSWORD'),
-                contextualise=False
+                bind_user=self.config.get("LDAP_BIND_USER_DN"),
+                bind_password=self.config.get("LDAP_BIND_USER_PASSWORD"),
+                contextualise=False,
             )
             connection.bind()
             if ctx is not None:
@@ -738,11 +734,13 @@ class LDAP3LoginManager:
                 upon bind if you use this internal method.
         """
 
-        return self._make_connection(bind_user, bind_password,
-                                     contextualise=False, **kwargs)
+        return self._make_connection(
+            bind_user, bind_password, contextualise=False, **kwargs
+        )
 
-    def _make_connection(self, bind_user=None, bind_password=None,
-                         contextualise=True, **kwargs):
+    def _make_connection(
+        self, bind_user=None, bind_password=None, contextualise=True, **kwargs
+    ):
         """
         Make a connection.
 
@@ -761,19 +759,21 @@ class LDAP3LoginManager:
 
         authentication = ldap3.ANONYMOUS
         if bind_user:
-            authentication = getattr(ldap3, self.config.get(
-                'LDAP_BIND_AUTHENTICATION_TYPE'))
+            authentication = getattr(
+                ldap3, self.config.get("LDAP_BIND_AUTHENTICATION_TYPE")
+            )
 
-        log.debug("Opening connection with bind user '{}'".format(
-            bind_user or 'Anonymous'))
+        log.debug(
+            "Opening connection with bind user '{}'".format(bind_user or "Anonymous")
+        )
         connection = ldap3.Connection(
             server=self._server_pool,
-            read_only=self.config.get('LDAP_READONLY'),
+            read_only=self.config.get("LDAP_READONLY"),
             user=bind_user,
             password=bind_password,
             client_strategy=ldap3.SYNC,
             authentication=authentication,
-            check_names=self.config['LDAP_CHECK_NAMES'],
+            check_names=self.config["LDAP_CHECK_NAMES"],
             raise_exceptions=True,
             **kwargs
         )
@@ -803,7 +803,7 @@ class LDAP3LoginManager:
         Returns:
             str: Full user search dn
         """
-        return self.compiled_sub_dn(self.config.get('LDAP_USER_DN'))
+        return self.compiled_sub_dn(self.config.get("LDAP_USER_DN"))
 
     @property
     def full_group_search_dn(self):
@@ -813,7 +813,7 @@ class LDAP3LoginManager:
         Returns:
             str: Full group search dn
         """
-        return self.compiled_sub_dn(self.config.get('LDAP_GROUP_DN'))
+        return self.compiled_sub_dn(self.config.get("LDAP_GROUP_DN"))
 
     def compiled_sub_dn(self, prepend):
         """
@@ -824,9 +824,8 @@ class LDAP3LoginManager:
             prepend (str): The dn to prepend to the base.
         """
         prepend = prepend.strip()
-        if prepend == '':
-            return self.config.get('LDAP_BASE_DN')
-        return '{prepend},{base}'.format(
-            prepend=prepend,
-            base=self.config.get('LDAP_BASE_DN')
+        if prepend == "":
+            return self.config.get("LDAP_BASE_DN")
+        return "{prepend},{base}".format(
+            prepend=prepend, base=self.config.get("LDAP_BASE_DN")
         )
