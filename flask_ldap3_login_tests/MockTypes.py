@@ -7,7 +7,7 @@ import mock
 from .Directory import get_directory_base, BIND_DIRECT_USERS
 
 log = logging.getLogger(__name__)
-single_filter = re.compile(r'([A-Za-z0-9_\-]+)=(.+)')
+single_filter = re.compile(r"([A-Za-z0-9_\-]+)=(.+)")
 
 
 def and_(cmps, data):
@@ -19,17 +19,17 @@ def or_(cmps, data):
 
 
 def build_comparison(cmp_string):
-    if cmp_string[0] == '(':
+    if cmp_string[0] == "(":
         depth = last_depth = i = 0
         cmps = []
 
         while i < len(cmp_string):
-            if cmp_string[i] == '(':
+            if cmp_string[i] == "(":
                 depth += 1
                 if depth == 1:
                     last_pop = i + 1
 
-            elif cmp_string[i] == ')':
+            elif cmp_string[i] == ")":
                 depth -= 1
 
             if depth == 0 and last_depth == 1:
@@ -39,11 +39,11 @@ def build_comparison(cmp_string):
             i += 1
         return cmps
 
-    elif cmp_string[0] == '&':
+    elif cmp_string[0] == "&":
         cmps = build_comparison(cmp_string[1:])
         return lambda data: and_(cmps, data)
 
-    elif cmp_string[0] == '|':
+    elif cmp_string[0] == "|":
         cmps = build_comparison(cmp_string[1:])
         return lambda data: or_(cmps, data)
 
@@ -80,7 +80,7 @@ class Connection(mock.MagicMock):
         pass
 
     def bind(self):
-        if not self.server or self.server.servers[0].host != 'ad.mydomain.com':
+        if not self.server or self.server.servers[0].host != "ad.mydomain.com":
             raise ldap3.core.exceptions.LDAPBindError
 
         if self.user:
@@ -93,21 +93,27 @@ class Connection(mock.MagicMock):
             # Validate the bind user.
             bind_user = get_directory_base(self.user)
 
-            if bind_user and self.password == bind_user['password']:
+            if bind_user and self.password == bind_user["password"]:
                 return True
 
             raise ldap3.core.exceptions.LDAPInvalidCredentialsResult
         else:
             return True
 
-    def search(self, search_base='', search_filter='(objectClass=*)',
-               search_scope=ldap3.SUBTREE, attributes=None):
+    def search(
+        self,
+        search_base="",
+        search_filter="(objectClass=*)",
+        search_scope=ldap3.SUBTREE,
+        attributes=None,
+    ):
 
-        log.info("Search began for base '{}' with filter '{}' in scope"
-                 " '{}' with attributes '{}'".format(search_base,
-                                                     search_filter,
-                                                     search_scope,
-                                                     attributes))
+        log.info(
+            "Search began for base '{}' with filter '{}' in scope"
+            " '{}' with attributes '{}'".format(
+                search_base, search_filter, search_scope, attributes
+            )
+        )
 
         check_user = build_comparison(search_filter)[0]
 
@@ -132,15 +138,20 @@ class Connection(mock.MagicMock):
                 return items
 
             items = recurse_search(scoped_directory)
-            items = [dict(attributes=user, dn=user['dn'],
-                          type='searchResEntry') for user in items]
+            items = [
+                dict(attributes=user, dn=user["dn"], type="searchResEntry")
+                for user in items
+            ]
             self._result = len(items) > 0
             self._response = items
 
         elif search_scope == ldap3.LEVEL:
 
-            matching = [dict(attributes=user, dn=user['dn'], type='searchResEntry')
-                        for user in scoped_directory.values() if check_user(user)]
+            matching = [
+                dict(attributes=user, dn=user["dn"], type="searchResEntry")
+                for user in scoped_directory.values()
+                if check_user(user)
+            ]
             self._result = len(matching) > 0
             self._response = matching
 
