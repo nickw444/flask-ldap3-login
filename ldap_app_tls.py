@@ -1,11 +1,11 @@
 import ssl
 
-from flask import Flask, url_for
-from flask_ldap3_login import LDAP3LoginManager
-from flask_login import LoginManager, login_user, UserMixin, current_user
-from flask import render_template_string, redirect
-from flask_ldap3_login.forms import LDAPLoginForm
+from flask import Flask, redirect, render_template_string, url_for
+from flask_login import LoginManager, UserMixin, current_user, login_user
 from ldap3 import Tls
+
+from flask_ldap3_login import LDAP3LoginManager
+from flask_ldap3_login.forms import LDAPLoginForm
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret"

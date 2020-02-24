@@ -1,4 +1,5 @@
 import logging
+from enum import Enum
 
 import ldap3
 
@@ -7,7 +8,6 @@ try:
 except ImportError:  # pragma: no cover
     from flask import _request_ctx_stack as stack
 
-from enum import Enum
 
 log = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ import re
 import ldap3
 import mock
 
-from .Directory import get_directory_base, BIND_DIRECT_USERS
+from .Directory import BIND_DIRECT_USERS, get_directory_base
 
 log = logging.getLogger(__name__)
 single_filter = re.compile(r"([A-Za-z0-9_\-]+)=(.+)")

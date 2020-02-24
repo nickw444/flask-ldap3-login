@@ -8,8 +8,9 @@ from ldap3 import Tls
 
 import flask_ldap3_login as ldap3_login
 from flask_ldap3_login.forms import LDAPLoginForm
+
 from .Directory import DIRECTORY
-from .MockTypes import Server, Connection, ServerPool
+from .MockTypes import Connection, Server, ServerPool
 
 try:
     from flask import _app_ctx_stack as stack
