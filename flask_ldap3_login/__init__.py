@@ -70,9 +70,9 @@ class AuthenticationResponse:
         user_dn=None,
         user_groups=[],
     ):
-        self.user_info = (user_info,)
-        self.user_id = (user_id,)
-        self.user_dn = (user_dn,)
+        self.user_info = user_info
+        self.user_id = user_id
+        self.user_dn = user_dn
         self.user_groups = user_groups
         self.status = status
 
