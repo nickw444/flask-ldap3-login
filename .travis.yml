@@ -6,13 +6,9 @@ python:
   - "3.7"
   - "3.8"
 
-install:
-  - pip install coveralls flake8
-  - pip install .
+install: pip install tox-travis
 
-script:
-  - flake8 .
-  - coverage run --source=flask_ldap3_login setup.py test
+script: tox
 
 after_success: coveralls
 
