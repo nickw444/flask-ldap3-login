@@ -1,7 +1,7 @@
-from flask import Flask, url_for
+from flask import Flask, redirect, render_template_string, url_for
+from flask_login import LoginManager, UserMixin, current_user, login_user
+
 from flask_ldap3_login import LDAP3LoginManager
-from flask_login import LoginManager, login_user, UserMixin, current_user
-from flask import render_template_string, redirect
 from flask_ldap3_login.forms import LDAPLoginForm
 
 app = Flask(__name__)
