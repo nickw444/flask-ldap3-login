@@ -282,10 +282,7 @@ class LDAP3LoginManager:
             username,
             current_app.config.get("LDAP_BIND_DIRECT_SUFFIX"),
         )
-        connection = self._make_connection(
-            bind_user=bind_user,
-            bind_password=password,
-        )
+        connection = self._make_connection(bind_user=bind_user, bind_password=password)
 
         response = AuthenticationResponse()
         try:
@@ -301,8 +298,7 @@ class LDAP3LoginManager:
                     username=username,
                 )
                 search_filter = "(&{}{})".format(
-                    current_app.config.get("LDAP_USER_OBJECT_FILTER"),
-                    user_filter,
+                    current_app.config.get("LDAP_USER_OBJECT_FILTER"), user_filter
                 )
 
                 connection.search(
@@ -362,10 +358,7 @@ class LDAP3LoginManager:
             user_search_dn=self.full_user_search_dn,
         )
 
-        connection = self._make_connection(
-            bind_user=bind_user,
-            bind_password=password,
-        )
+        connection = self._make_connection(bind_user=bind_user, bind_password=password)
 
         response = AuthenticationResponse()
 
@@ -436,8 +429,7 @@ class LDAP3LoginManager:
             username=username,
         )
         search_filter = "(&{}{})".format(
-            current_app.config.get("LDAP_USER_OBJECT_FILTER"),
-            user_filter,
+            current_app.config.get("LDAP_USER_OBJECT_FILTER"), user_filter
         )
 
         log.debug(
