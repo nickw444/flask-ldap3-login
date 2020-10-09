@@ -55,12 +55,11 @@ class AuthenticationResponse:
     A response object when authenticating. Lets us pass status codes around
     and also user data.
 
-    Args:
-        status (AuthenticationResponseStatus):  The status of the result.
-        user_info (dict): User info dictionary obtained from LDAP.
-        user_id (str): User id used to authenticate to LDAP with.
-        user_dn (str): User DN found from LDAP.
-        user_groups (list): A list containing a dicts of group info.
+    :param AuthenticationResponseStatus status:  The status of the result.
+    :param dict user_info: User info dictionary obtained from LDAP.
+    :param str user_id: User id used to authenticate to LDAP with.
+    :param str user_dn: User DN found from LDAP.
+    :param list user_groups: A list containing a dicts of group info.
     """
 
     def __init__(
@@ -83,8 +82,7 @@ class LDAP3LoginManager:
     Initialise a LDAP3LoginManager. If app is passed, init_app is called
     within this call.
 
-    Args:
-        app (flask.Flask): The flask app to initialise with
+    :param flask.Flask app: The flask app to initialise with
     """
 
     def __init__(self, app=None):
@@ -100,8 +98,7 @@ class LDAP3LoginManager:
         ``teardown_appcontext`` call, and attaches this ``LDAP3LoginManager``
         to it as ``app.ldap3_login_manager``.
 
-        Args:
-            app (flask.Flask): The flask app to initialise with
+        :param flask.Flask app: The flask app to initialise with
         """
 
         app.ldap3_login_manager = self
@@ -133,17 +130,15 @@ class LDAP3LoginManager:
         Add an additional server to the server pool and return the
         freshly created server.
 
-        Args:
-            hostname (str): Hostname of the server
-            port (int): Port of the server
-            use_ssl (bool): True if SSL is to be used when connecting.
-            tls_ctx (ldap3.Tls): An optional TLS context object to use
-                when connecting.
-            app (flask.Flask): The app on which to add the server. If not
+        :param str hostname: Hostname of the server
+        :param int port: Port of the server
+        :param bool use_ssl: True if SSL is to be used when connecting.
+        :param ldap3.Tls tls_ctx: An optional TLS context object to use when connecting.
+        :param flask.Flask app: The app on which to add the server. If not
                 given, ``flask.current_app`` is used.
 
-        Returns:
-            ldap3.Server: The freshly created server object.
+        :rtype: ldap3.Server
+        :returns: The freshly created server object.
         """
         if app is None:
             app = current_app._get_current_object()
@@ -158,9 +153,7 @@ class LDAP3LoginManager:
         Add a connection to the appcontext so it can be freed/unbound at
         a later time if an exception occured and it was not freed.
 
-        Args:
-            connection (ldap3.Connection): Connection to add to the appcontext
-
+        :param ldap3.Connection connection : Connection to add to the appcontext
         """
 
         ctx = stack.top
@@ -174,10 +167,8 @@ class LDAP3LoginManager:
         """
         Remove a connection from the appcontext.
 
-        Args:
-            connection (ldap3.Connection): connection to remove from the
+        :param ldap3.Connection connection: connection to remove from the
                 appcontext
-
         """
 
         ctx = stack.top
@@ -217,9 +208,7 @@ class LDAP3LoginManager:
         (or similar). as this is used within the LoginForm and placed
         at ``form.user``
 
-        Args:
-            callback (function): The function to be used as the save user
-                                 callback.
+        :param function callback: The function to be used as the save user callback.
         """
 
         self._save_user = callback
@@ -231,14 +220,12 @@ class LDAP3LoginManager:
         direct bind or a search bind based upon the login attribute configured
         in the config.
 
-        Args:
-            username (str): Username of the user to bind
-            password (str): User's password to bind with.
+        :param str username: Username of the user to bind
+        :param str password: User's password to bind with.
 
-        Returns:
-            AuthenticationResponse
-
+        :rtype: AuthenticationResponse
         """
+
         if current_app.config.get("LDAP_BIND_DIRECT_CREDENTIALS"):
             result = self.authenticate_direct_credentials(username, password)
 
@@ -267,14 +254,12 @@ class LDAP3LoginManager:
         ldap. Instead we can only deduce whether or not their bind was
         successful. Do not use this method if you require more user info.
 
-        Args:
-            username (str): Username for the user to bind with.
+        :param str username: Username for the user to bind with.
                             LDAP_BIND_DIRECT_PREFIX will be prepended and
                             LDAP_BIND_DIRECT_SUFFIX will be appended.
-            password (str): User's password to bind with.
+        :param str password: User's password to bind with.
 
-        Returns:
-            AuthenticationResponse
+        :rtype: AuthenticationResponse
         """
 
         bind_user = "{}{}{}".format(
@@ -343,13 +328,11 @@ class LDAP3LoginManager:
         as the login attribute. Hence we just string together a dn to find
         this user with.
 
-        Args:
-            username (str): Username of the user to bind (the field specified
+        :param str username: Username of the user to bind (the field specified
                 as LDAP_BIND_RDN_ATTR)
-            password (str): User's password to bind with.
+        :param str password: User's password to bind with.
 
-        Returns:
-            AuthenticationResponse
+        :rtype: AuthenticationResponse
         """
 
         bind_user = "{rdn}={username},{user_search_dn}".format(
@@ -397,13 +380,11 @@ class LDAP3LoginManager:
         the fly, instead we have to find it in the LDAP, then attempt
         to bind with their credentials.
 
-        Args:
-            username (str): Username of the user to bind (the field specified
+        :param str username: Username of the user to bind (the field specified
                             as LDAP_BIND_LOGIN_ATTR)
-            password (str): User's password to bind with when we find their dn.
+        :param str password: User's password to bind with when we find their dn.
 
-        Returns:
-            AuthenticationResponse
+        :rtype: AuthenticationResponse
 
         """
         connection = self._make_connection(
@@ -518,16 +499,15 @@ class LDAP3LoginManager:
         """
         Gets a list of groups a user at dn is a member of
 
-        Args:
-            dn (str): The dn of the user to find memberships for.
-            _connection (ldap3.Connection): A connection object to use when
+        :param str dn: The dn of the user to find memberships for.
+        :param ldap3.Connection _connection: A connection object to use when
                 searching. If not given, a temporary connection will be
                 created, and destroyed after use.
-            group_search_dn (str): The search dn for groups. Defaults to
+        :param str group_search_dn: The search dn for groups. Defaults to
                 ``'{LDAP_GROUP_DN},{LDAP_BASE_DN}'``.
 
-        Returns:
-            list: A list of LDAP groups the user is a member of.
+        :rtype: list
+        :returns: A list of LDAP groups the user is a member of.
         """
 
         connection = _connection
@@ -583,15 +563,13 @@ class LDAP3LoginManager:
         """
         Gets info about a user specified at dn.
 
-        Args:
-            dn (str): The dn of the user to find
-            _connection (ldap3.Connection): A connection object to use when
+        :param str dn: The dn of the user to find
+        :param ldap3.Connection _connection: A connection object to use when
                 searching. If not given, a temporary connection will be
                 created, and destroyed after use.
 
-        Returns:
-            dict: A dictionary of the user info from LDAP
-
+        :rtype: dict
+        :returns: A dictionary of the user info from LDAP
         """
         return self.get_object(
             dn=dn,
@@ -607,13 +585,13 @@ class LDAP3LoginManager:
         LDAP_USER_LOGIN_ATTR.
 
 
-        Args:
-            username (str): Username of the user to search for.
-            _connection (ldap3.Connection): A connection object to use when
+        :param str username: Username of the user to search for.
+        :param ldap3.Connection _connection: A connection object to use when
                 searching. If not given, a temporary connection will be
                 created, and destroyed after use.
-        Returns:
-            dict: A dictionary of the user info from LDAP
+
+        :rtype: dict
+        :returns: A dictionary of the user info from LDAP
         """
         ldap_filter = "(&({}={}){})".format(
             current_app.config.get("LDAP_USER_LOGIN_ATTR"),
@@ -632,14 +610,13 @@ class LDAP3LoginManager:
         """
         Gets info about a group specified at dn.
 
-        Args:
-            dn (str): The dn of the group to find
-            _connection (ldap3.Connection): A connection object to use when
+        :param str dn: The dn of the group to find
+        :param ldap3.Connection _connection: A connection object to use when
                 searching. If not given, a temporary connection will be
                 created, and destroyed after use.
 
-        Returns:
-            dict: A dictionary of the group info from LDAP
+        :rtype: dict
+        :returns: A dictionary of the group info from LDAP
         """
 
         return self.get_object(
@@ -653,16 +630,15 @@ class LDAP3LoginManager:
         """
         Gets an object at the specified dn and returns it.
 
-        Args:
-            dn (str): The dn of the object to find.
-            filter (str): The LDAP syntax search filter.
-            attributes (list): A list of LDAP attributes to get when searching.
-            _connection (ldap3.Connection): A connection object to use when
+        :param str dn: The dn of the object to find.
+        :param str filter: The LDAP syntax search filter.
+        :param list attributes: A list of LDAP attributes to get when searching.
+        :param ldap3.Connection _connection: A connection object to use when
                 searching. If not given, a temporary connection will be created,
                 and destroyed after use.
 
-        Returns:
-            dict: A dictionary of the object info from LDAP
+        :rtype: dict
+        :returns: A dictionary of the object info from LDAP
         """
 
         connection = _connection
@@ -697,9 +673,9 @@ class LDAP3LoginManager:
         connection to the server. This connection is automatically
         handled by the appcontext, so you do not have to perform an unbind.
 
-        Returns:
-            ldap3.Connection: A bound ldap3.Connection
-        Raises:
+        :rtype: ldap3.Connection
+        :return: A bound ldap3.Connection
+        :raise:
             ldap3.core.exceptions.LDAPException: Since this method is performing
                 a bind on behalf of the caller. You should handle this case
                 occuring, such as invalid service credentials.
@@ -730,16 +706,15 @@ class LDAP3LoginManager:
         """
         Make a connection to the LDAP Directory.
 
-        Args:
-            bind_user (str): User to bind with. If `None`, AUTH_ANONYMOUS is
+        :param str bind_user: User to bind with. If `None`, AUTH_ANONYMOUS is
                 used, otherwise authentication specified with
                 config['LDAP_BIND_AUTHENTICATION_TYPE'] is used.
-            bind_password (str): Password to bind to the directory with
-            **kwargs (dict): Additional arguments to pass to the
+        :param str bind_password: Password to bind to the directory with
+        :param dict kwargs: Additional arguments to pass to the
                 ``ldap3.Connection``
 
-        Returns:
-            ldap3.Connection: An unbound ldap3.Connection. You should handle exceptions
+        :rtype: ldap3.Connection
+        :returns: An unbound ldap3.Connection. You should handle exceptions
                 upon bind if you use this internal method.
         """
 
@@ -753,16 +728,15 @@ class LDAP3LoginManager:
         """
         Make a connection.
 
-        Args:
-            bind_user (str): User to bind with. If `None`, AUTH_ANONYMOUS is
+        :param str bind_user: User to bind with. If `None`, AUTH_ANONYMOUS is
                 used, otherwise authentication specified with
                 config['LDAP_BIND_AUTHENTICATION_TYPE'] is used.
-            bind_password (str): Password to bind to the directory with
-            contextualise (bool): If true (default), will add this connection to the
+        :param str bind_password: Password to bind to the directory with
+        :param bool contextualise: If true (default), will add this connection to the
                 appcontext so it can be unbound upon app_teardown.
 
-        Returns:
-            ldap3.Connection: An unbound ldap3.Connection. You should handle exceptions
+        :rtype: ldap3.Connection
+        :returns: An unbound ldap3.Connection. You should handle exceptions
                 upon bind if you use this internal method.
         """
 
@@ -799,8 +773,7 @@ class LDAP3LoginManager:
         Destroys a connection. Removes the connection from the appcontext, and
         unbinds it.
 
-        Args:
-            connection (ldap3.Connection):  The connnection to destroy
+        :param ldap3.Connection connection:  The connnection to destroy
         """
 
         log.debug("Destroying connection at <{}>".format(hex(id(connection))))
@@ -812,8 +785,8 @@ class LDAP3LoginManager:
         """
         Returns a the base search DN with the user search DN prepended.
 
-        Returns:
-            str: Full user search dn
+        :rtype: str
+        :returns: Full user search dn
         """
         return self.compiled_sub_dn(current_app.config.get("LDAP_USER_DN"))
 
@@ -822,18 +795,17 @@ class LDAP3LoginManager:
         """
         Returns a the base search DN with the group search DN prepended.
 
-        Returns:
-            str: Full group search dn
+        :rtype: str
+        :returns: Full group search dn
         """
         return self.compiled_sub_dn(current_app.config.get("LDAP_GROUP_DN"))
 
     def compiled_sub_dn(self, prepend):
         """
-        Returns:
-            str: A DN with the DN Base appended to the end.
+        :param str prepend: The dn to prepend to the base.
 
-        Args:
-            prepend (str): The dn to prepend to the base.
+        :rtype: str
+        :returns: A DN with the DN Base appended to the end.
         """
         prepend = prepend.strip()
         if prepend == "":

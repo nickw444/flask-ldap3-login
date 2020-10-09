@@ -1,3 +1,6 @@
+flask
+flask-wtf
+ldap3
 sphinx
 sphinxcontrib-napoleon
 pallets-sphinx-themes
