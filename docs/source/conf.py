@@ -31,11 +31,14 @@
 import os
 import sys
 
+sys.path.insert(0, os.path.abspath("../.."))
+
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
+    "pallets_sphinx_themes",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -124,7 +127,6 @@ html_theme = "flask"
 # documentation.
 #
 # html_theme_options = {}
-html_theme_options = {"index_logo": "logo-full.png"}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
