@@ -38,6 +38,7 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
+    "sphinx.ext.napoleon",
     "pallets_sphinx_themes",
 ]
 
