@@ -11,22 +11,6 @@ Flask-LDAP3-Login
     :target: https://pypi.python.org/pypi/flask-ldap3-login/
     :alt: Latest Version
 
-Maintainer Wanted
------------------
-
-Back in 2015 I set out to create a new LDAP integration for Flask that was compatible with ``python3-ldap``. At the time, the only LDAP extension for Flask `flask-ldap3-login <https://github.com/ContinuumIO/flask-ldap-login>`_ did not support Python 3.
-
-As time progressed, I moved away from my previous job where LDAP integrations were part of day-to-day client consulting projects, into a software product company working on an entirely different tech stack with no need for anything remotely to do with LDAP. 
-
-Due to this, my focus was taken away from this library. I have too much on my plate to give this library the love it needs and deserves. New features and bug fixes became harder to manually test as I no longer had redily available testing environments, giving me lower confidence in iterating and improving the library.
-
-Due to a high number of open & active issues, I believe there is still some demand for this library, and for this reason alone I do not want to sunset it. I'd rather find a new maintainer who can triage new issues and encourage new contributors to submit patches to fix bugs and add necessary functionality.
-
-**Until a new maintainer is found, issues submitted to this repo will not be actioned.**
-
-If you are interested in becoming a maintainer, please email me at ``flask-ldap3-login [at] nickwhyte [dot] com``, or alternatively raise an issue in this repo.
-
-----
 
 Flask LDAP3 Login allows you to easily integrate your flask app with an LDAP
 directory. It can be used as an extension to Flask-Login and can even be used
