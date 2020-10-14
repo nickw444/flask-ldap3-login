@@ -1,3 +1,3 @@
-.
 sphinx
 sphinxcontrib-napoleon
+pallets-sphinx-themes
