@@ -328,14 +328,16 @@ class LDAP3LoginManager:
                     response.user_info = user["attributes"]
                     response.user_dn = user["dn"]
 
-        except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
+        except ldap3.core.exceptions.LDAPInvalidCredentialsResult as e:
             log.debug(
                 "Authentication was not successful for user '{}'".format(username)
             )
             response.status = AuthenticationResponseStatus.fail
+            response.exception = e
         except Exception as e:
             log.error(e)
             response.status = AuthenticationResponseStatus.fail
+            response.exception = e
 
         self.destroy_connection(connection)
         return response
@@ -380,14 +382,16 @@ class LDAP3LoginManager:
                     dn=bind_user, _connection=connection
                 )
 
-        except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
+        except ldap3.core.exceptions.LDAPInvalidCredentialsResult as e:
             log.debug(
                 "Authentication was not successful for user '{}'".format(username)
             )
             response.status = AuthenticationResponseStatus.fail
+            response.exception = e
         except Exception as e:
             log.error(e)
             response.status = AuthenticationResponseStatus.fail
+            response.exception = e
 
         self.destroy_connection(connection)
         return response
@@ -500,17 +504,19 @@ class LDAP3LoginManager:
                     self.destroy_connection(user_connection)
                     break
 
-                except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
+                except ldap3.core.exceptions.LDAPInvalidCredentialsResult as e:
                     log.debug(
                         "Authentication was not successful for "
                         "user '{}'".format(username)
                     )
                     response.status = AuthenticationResponseStatus.fail
+                    response.exception = e
                 except Exception as e:  # pragma: no cover
                     # This should never happen, however in case ldap3 does ever
                     # throw an error here, we catch it and log it
                     log.error(e)
                     response.status = AuthenticationResponseStatus.fail
+                    response.exception = e
 
                 self.destroy_connection(user_connection)
 
