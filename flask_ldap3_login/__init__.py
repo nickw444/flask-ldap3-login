@@ -57,6 +57,7 @@ class AuthenticationResponse:
 
     Args:
         status (AuthenticationResponseStatus):  The status of the result.
+        exception (Exception): Exceptions raised during Authentication
         user_info (dict): User info dictionary obtained from LDAP.
         user_id (str): User id used to authenticate to LDAP with.
         user_dn (str): User DN found from LDAP.
@@ -66,6 +67,7 @@ class AuthenticationResponse:
     def __init__(
         self,
         status=AuthenticationResponseStatus.fail,
+        exception=None,
         user_info=None,
         user_id=None,
         user_dn=None,
@@ -76,6 +78,7 @@ class AuthenticationResponse:
         self.user_dn = user_dn
         self.user_groups = user_groups
         self.status = status
+        self.exception = exception
 
 
 class LDAP3LoginManager:
@@ -325,14 +328,16 @@ class LDAP3LoginManager:
                     response.user_info = user["attributes"]
                     response.user_dn = user["dn"]
 
-        except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
+        except ldap3.core.exceptions.LDAPInvalidCredentialsResult as e:
             log.debug(
                 "Authentication was not successful for user '{}'".format(username)
             )
             response.status = AuthenticationResponseStatus.fail
+            response.exception = e
         except Exception as e:
             log.error(e)
             response.status = AuthenticationResponseStatus.fail
+            response.exception = e
 
         self.destroy_connection(connection)
         return response
@@ -377,14 +382,16 @@ class LDAP3LoginManager:
                     dn=bind_user, _connection=connection
                 )
 
-        except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
+        except ldap3.core.exceptions.LDAPInvalidCredentialsResult as e:
             log.debug(
                 "Authentication was not successful for user '{}'".format(username)
             )
             response.status = AuthenticationResponseStatus.fail
+            response.exception = e
         except Exception as e:
             log.error(e)
             response.status = AuthenticationResponseStatus.fail
+            response.exception = e
 
         self.destroy_connection(connection)
         return response
@@ -421,7 +428,7 @@ class LDAP3LoginManager:
         except Exception as e:
             self.destroy_connection(connection)
             log.error(e)
-            return AuthenticationResponse()
+            return AuthenticationResponse(exception=e)
 
         # Find the user in the search path.
         user_filter = "({search_attr}={username})".format(
@@ -497,17 +504,19 @@ class LDAP3LoginManager:
                     self.destroy_connection(user_connection)
                     break
 
-                except ldap3.core.exceptions.LDAPInvalidCredentialsResult:
+                except ldap3.core.exceptions.LDAPInvalidCredentialsResult as e:
                     log.debug(
                         "Authentication was not successful for "
                         "user '{}'".format(username)
                     )
                     response.status = AuthenticationResponseStatus.fail
+                    response.exception = e
                 except Exception as e:  # pragma: no cover
                     # This should never happen, however in case ldap3 does ever
                     # throw an error here, we catch it and log it
                     log.error(e)
                     response.status = AuthenticationResponseStatus.fail
+                    response.exception = e
 
                 self.destroy_connection(user_connection)
 
