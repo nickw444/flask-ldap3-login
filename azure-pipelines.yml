@@ -84,6 +84,8 @@ jobs:
   - job: release
     dependsOn:
       - test
+      - docs
+      - lint
     displayName: "Release"
     condition: succeeded()
     steps:
