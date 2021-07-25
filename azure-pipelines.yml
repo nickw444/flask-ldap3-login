@@ -76,6 +76,10 @@ jobs:
         displayName: 'Run Tests (with coverage)'
         env:
           TOXENV: $(tox.env)
+      - script: tox
+        displayName: 'Combine Coverage'
+        env:
+          TOXENV: coverage-combine
       - script: |
           bash <(curl -s https://codecov.io/bash)
         displayName: 'Upload to codecov.io'
