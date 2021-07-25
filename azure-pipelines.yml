@@ -52,7 +52,7 @@ jobs:
         env:
           TOXENV: 'docs'
   - job: test
-    displayName: "Build and Test"
+    displayName: "Test"
     strategy:
       matrix:
         PythonPyPy3:
