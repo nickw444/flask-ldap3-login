@@ -92,3 +92,24 @@ jobs:
     condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     steps:
       - ${{ parameters.step_install_dependencies }}
+      - task: TwineAuthenticate@1
+        inputs:
+          pythonUploadServiceConnection: 'flask-ldap3-login'
+      - script: |
+          pip install twine wheel
+        displayName: 'Install Release Dependencies'
+      - script: |
+          python setup.py sdist bdist_wheel
+        displayName: 'Build Release'
+      - script: |
+          python -m twine upload -r 'flask-ldap3-login' --config-file $(PYPIRC_PATH) $(System.ArtifactsDirectory)/dist/*.whl
+        displayName: "Release to PyPi"
+      - task: GitHubRelease@1
+        inputs:
+          gitHubConnection: 'github.com_nickw444'
+          repositoryName: '$(Build.Repository.Name)'
+          action: 'create'
+          target: '$(Build.SourceVersion)'
+          tagSource: 'gitTag'
+          changeLogCompareToRelease: 'lastFullRelease'
+          changeLogType: 'commitBased'
