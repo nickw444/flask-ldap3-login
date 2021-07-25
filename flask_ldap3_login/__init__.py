@@ -10,8 +10,6 @@ except ImportError:  # pragma: no cover
     from flask import _request_ctx_stack as stack
 
 
-__version__ = "0.0.0-dev"
-
 log = logging.getLogger(__name__)
 
 AuthenticationResponseStatus = Enum("AuthenticationResponseStatus", "fail success")
