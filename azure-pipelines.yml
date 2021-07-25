@@ -45,6 +45,7 @@ jobs:
           TOXENV: 'lint'
   - job: docs
     displayName: "Build Docs"
+    steps:
       - ${{ parameters.step_install_dependencies }}
       - script: tox
         displayName: 'Build Docs'
