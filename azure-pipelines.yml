@@ -92,6 +92,7 @@ jobs:
           pip install twine wheel
         displayName: 'Install Release Dependencies'
       - script: |
+          set -e
           git describe --exact-match > VERSION
           python setup.py sdist bdist_wheel
         displayName: 'Build Release'
