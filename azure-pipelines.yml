@@ -85,18 +85,18 @@ jobs:
     dependsOn:
       - test
     displayName: "Release"
-    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+    condition: succeeded()
     steps:
       - ${{ parameters.step_install_dependencies }}
-      - task: TwineAuthenticate@1
-        inputs:
-          pythonUploadServiceConnection: 'flask-ldap3-login'
       - script: |
           pip install twine wheel
         displayName: 'Install Release Dependencies'
       - script: |
           python setup.py sdist bdist_wheel
         displayName: 'Build Release'
+      - task: TwineAuthenticate@1
+        inputs:
+          pythonUploadServiceConnection: 'flask-ldap3-login'
       - script: |
           python -m twine upload -r 'flask-ldap3-login' --config-file $(PYPIRC_PATH) $(System.ArtifactsDirectory)/dist/*.whl
         displayName: "Release to PyPi"
