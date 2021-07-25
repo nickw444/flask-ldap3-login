@@ -98,6 +98,7 @@ jobs:
         inputs:
           pythonUploadServiceConnection: 'flask-ldap3-login'
       - script: |
+          git describe --exact-match > VERSION
           python -m twine upload -r 'flask-ldap3-login' --config-file $(PYPIRC_PATH) $(System.ArtifactsDirectory)/dist/*.whl
         displayName: "Release to PyPi"
       - task: GitHubRelease@1
