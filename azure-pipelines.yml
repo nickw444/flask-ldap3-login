@@ -87,7 +87,7 @@ jobs:
       - docs
       - lint
     displayName: "Release"
-    condition: succeeded()
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     steps:
       - ${{ parameters.step_install_dependencies }}
       - script: |
