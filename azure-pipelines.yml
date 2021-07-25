@@ -92,13 +92,14 @@ jobs:
           pip install twine wheel
         displayName: 'Install Release Dependencies'
       - script: |
+          sed -i "s/0.0.0-dev/$(git describe --exact-match)/" flask_ldap3_login/__init__.py
           python setup.py sdist bdist_wheel
         displayName: 'Build Release'
       - task: TwineAuthenticate@1
         inputs:
           pythonUploadServiceConnection: 'flask-ldap3-login'
       - script: |
-          python -m twine upload -r 'flask-ldap3-login' --config-file $(PYPIRC_PATH) $(System.ArtifactsDirectory)/dist/*.whl
+          python -m twine upload -r 'flask-ldap3-login' --config-file $(PYPIRC_PATH) dist/*.whl dist/*.tar.gz
         displayName: "Release to PyPi"
       - task: GitHubRelease@1
         inputs:
