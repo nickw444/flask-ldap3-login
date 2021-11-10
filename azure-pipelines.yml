@@ -1,0 +1,115 @@
+trigger:
+  branches:
+    include:
+      - master
+  tags:
+    include:
+      - '*'
+
+schedules:
+- cron: '0 3 * * 6'
+  displayName: "Weekly scheduled build"
+  branches:
+    include:
+      - 'master'
+  always: true
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+- name: python.version
+  value: 3.x
+
+parameters:
+- name: step_install_dependencies
+  type: stepList
+  default:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+    - script: |
+        python -m pip install --upgrade pip
+        pip install tox
+      displayName: 'Install Dependencies'
+
+jobs:
+  - job: lint
+    displayName: "Lint"
+    steps:
+      - ${{ parameters.step_install_dependencies }}
+      - script: tox
+        displayName: 'Lint'
+        env:
+          TOXENV: 'lint'
+  - job: docs
+    displayName: "Build Docs"
+    steps:
+      - ${{ parameters.step_install_dependencies }}
+      - script: tox
+        displayName: 'Build Docs'
+        env:
+          TOXENV: 'docs'
+  - job: test
+    displayName: "Test"
+    strategy:
+      matrix:
+        PythonPyPy3:
+          python.version: 'pypy3'
+          tox.env: 'pypy3'
+        Python35:
+          python.version: '3.5'
+          tox.env: 'py35'
+        Python36:
+          python.version: '3.6'
+          tox.env: 'py36'
+        Python37:
+          python.version: '3.7'
+          tox.env: 'py37'
+        Python38:
+          python.version: '3.8'
+          tox.env: 'py38'
+    steps:
+      - ${{ parameters.step_install_dependencies }}
+      - script: tox
+        displayName: 'Run Tests (with coverage)'
+        env:
+          TOXENV: $(tox.env)
+      - script: |
+          bash <(curl -s https://codecov.io/bash)
+        displayName: 'Upload to codecov.io'
+        # Only publish coverage from Python latest build.
+        condition: eq(variables['python.version'], '3.8')
+  - job: release
+    dependsOn:
+      - test
+      - docs
+      - lint
+    displayName: "Release"
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+    steps:
+      - ${{ parameters.step_install_dependencies }}
+      - script: |
+          pip install twine wheel
+        displayName: 'Install Release Dependencies'
+      - script: |
+          set -e
+          git describe --exact-match > VERSION
+          python setup.py sdist bdist_wheel
+        displayName: 'Build Release'
+      - task: TwineAuthenticate@1
+        inputs:
+          pythonUploadServiceConnection: 'flask-ldap3-login'
+      - script: |
+          python -m twine upload -r 'flask-ldap3-login' --config-file $(PYPIRC_PATH) dist/*.{whl,tar.gz}
+        displayName: "Release to PyPi"
+      - task: GitHubRelease@1
+        inputs:
+          gitHubConnection: 'github.com_nickw444'
+          repositoryName: '$(Build.Repository.Name)'
+          action: 'create'
+          target: '$(Build.SourceVersion)'
+          tagSource: 'gitTag'
+          changeLogCompareToRelease: 'lastFullRelease'
+          changeLogType: 'commitBased'
