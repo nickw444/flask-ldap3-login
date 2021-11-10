@@ -25,8 +25,8 @@ class LDAPLoginForm(FlaskForm):
 
     """
 
-    username = wtforms.StringField("Username", validators=[validators.Required()])
-    password = wtforms.PasswordField("Password", validators=[validators.Required()])
+    username = wtforms.StringField("Username", validators=[validators.DataRequired()])
+    password = wtforms.PasswordField("Password", validators=[validators.DataRequired()])
     submit = wtforms.SubmitField("Submit")
     remember_me = wtforms.BooleanField("Remember Me", default=True)
 
