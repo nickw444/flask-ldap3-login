@@ -72,7 +72,7 @@ jobs:
       - name: 'Run Tests (with coverage)'
         run: tox
         env:
-          TOXENV: ${{ matrix.python-version }}
+          TOXENV: ${{ matrix.toxenv }}
       - uses: codecov/codecov-action@v2
         if: ${{ matrix.python-version }} == '3.9'
 
