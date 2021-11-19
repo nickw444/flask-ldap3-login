@@ -100,7 +100,6 @@ jobs:
           git describe --exact-match > VERSION
           python setup.py sdist bdist_wheel
       - name: Release to PyPi 📦
-        if: 
         uses: pypa/gh-action-pypi-publish@master
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
