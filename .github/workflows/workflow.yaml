@@ -77,7 +77,7 @@ jobs:
         if: ${{ matrix.python-version == '3.9' }}
       - name: "Build Package 📦"
         run: |
-          git describe --tags > VERSION
+          echo "$(git describe --tags --exact-match || echo '0.0.0-dev')" > VERSION
           python setup.py sdist bdist_wheel
       - uses: actions/upload-artifact@v2
         # Only publish artifacts from Python latest build.
