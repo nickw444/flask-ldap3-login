@@ -1,8 +1,8 @@
 Flask-LDAP3-Login
 ============================================
 
-.. image:: https://travis-ci.org/nickw444/flask-ldap3-login.svg?branch=master
-    :target: https://travis-ci.org/nickw444/flask-ldap3-login
+.. image:: https://github.com/nickw444/flask-ldap3-login/actions/workflows/workflow.yaml/badge.svg
+    :target: https://github.com/nickw444/flask-ldap3-login/actions/workflows/workflow.yaml
 
 .. image:: https://coveralls.io/repos/nickw444/flask-ldap3-login/badge.svg
     :target: https://coveralls.io/r/nickw444/flask-ldap3-login
