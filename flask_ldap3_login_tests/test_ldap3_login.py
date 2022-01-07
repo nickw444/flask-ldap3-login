@@ -1,4 +1,6 @@
 import logging
+import os
+import tempfile
 import unittest
 
 import flask
@@ -9,7 +11,7 @@ from ldap3 import Tls
 import flask_ldap3_login as ldap3_login
 from flask_ldap3_login.forms import LDAPLoginForm
 
-from .Directory import DIRECTORY
+from .Directory import DIRECTORY, dump_directory_to_file
 from .MockTypes import Connection, Server, ServerPool
 
 try:
@@ -644,3 +646,35 @@ class LdapCheckNamesTestCase(BaseTestCase):
         self.manager.authenticate("janecitizen", "fake321")
         connection.assert_called_once()
         self.assertEqual(connection.call_args[1]["check_names"], False)
+
+
+class MockConnectionTestCase(unittest.TestCase):
+    def setUp(self):
+        # Create Temporary Dump of Directory Data
+        self.ldap_dump_fd, self.ldap_dump_path = tempfile.mkstemp()
+        dump_directory_to_file(self.ldap_dump_path)
+        # Initialize App with updated config
+        app = flask.Flask(__name__)
+        app.config.update(BASE_CONFIG)
+        app.config.update({"LDAP_MOCK_DATA": self.ldap_dump_path})
+        self.app = app
+        # Setup LDAP3LoginManager using mock data
+        ldap3_manager = ldap3_login.LDAP3LoginManager(app)
+        self.manager = ldap3_manager
+        self.app.app_context().push()
+
+    def tearDown(self):
+        stack.top.pop()
+        super().tearDown()
+        os.close(self.ldap_dump_fd)
+        os.unlink(self.ldap_dump_path)
+
+    def test_get_user_info_for_username(self):
+        user = self.manager.get_user_info_for_username("nick@nickwhyte.com")
+        # The MOCK ldap3 Connection returns the "password" attribute as a list.
+        DIRECTORY["dc=com"]["dc=mydomain"]["ou=users"]["cn=Nick Whyte"]["password"] = [
+            DIRECTORY["dc=com"]["dc=mydomain"]["ou=users"]["cn=Nick Whyte"]["password"]
+        ]
+        self.assertEqual(
+            user, DIRECTORY["dc=com"]["dc=mydomain"]["ou=users"]["cn=Nick Whyte"]
+        )
