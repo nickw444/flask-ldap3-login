@@ -27,8 +27,6 @@ Core
                                          Useful for running unit tests.
                                          The value is used to point to a json
                                          entries file to load data to the DIT.
-                                         This path is relative to the Flask
-                                         ``app.instance_path`` if initialized with an app.
                                          Defaults to ``None`` (no mocking).
 
 ``LDAP_USE_SSL``                         Specifies whether the default server

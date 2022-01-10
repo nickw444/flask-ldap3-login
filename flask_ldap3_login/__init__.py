@@ -814,7 +814,8 @@ class LDAP3LoginManager:
 
         if current_app.config.get("LDAP_MOCK_DATA") is not None:
             # TODO: Should use current_app.instance_path relative path
-            #  or app.open_instance_resource to open file
+            #  or app.open_instance_resource to open file, but entries_from_json
+            #  expects a filename to open, not file data.
             log.info(
                 "Loading LDAP_MOCK_DATA from: {}".format(
                     current_app.config.get("LDAP_MOCK_DATA")
