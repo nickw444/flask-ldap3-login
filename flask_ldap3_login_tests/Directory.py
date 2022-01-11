@@ -98,11 +98,7 @@ def get_directory_base(dn):
 def key_path_recurse(d, path=None):
     """Used by `dump_directory_to_file` to flatten DIRECTORY"""
     keys = d.keys()
-    if (
-        len(list(filter(lambda k: "=" in k, keys))) == 0
-    ):  # The keys are clearly attributes, return them.
-        return {"dn": path, "raw": d}
-    else:
+    if any("=" in k for k in d):  # If any keys have "=", assume they are paths.
         result = list()
         for k in keys:
             new_path = ",".join([k, path]) if path else k
@@ -114,6 +110,8 @@ def key_path_recurse(d, path=None):
             else:
                 raise ValueError("Unexpected type for key result: {}".format(kres))
         return result
+    else:  # Otherwise, assume it's the attributes.
+        return {"dn": path, "raw": d}
 
 
 def dump_directory_to_file(filename):
