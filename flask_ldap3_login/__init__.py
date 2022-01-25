@@ -47,6 +47,7 @@ _CONFIG_DEFAULTS = [
     ("LDAP_GROUP_MEMBERS_ATTR", "uniqueMember"),
     ("LDAP_GET_GROUP_ATTRIBUTES", ldap3.ALL_ATTRIBUTES),
     ("LDAP_ADD_SERVER", True),
+    ("LDAP_MOCK_DATA", None),
 ]
 
 
@@ -784,20 +785,45 @@ class LDAP3LoginManager:
                 ldap3, current_app.config.get("LDAP_BIND_AUTHENTICATION_TYPE")
             )
 
+        if current_app.config.get("LDAP_MOCK_DATA") is None:
+            strategy = ldap3.SYNC
+            server_arg = app.ldap3_login_manager_server_pool
+        else:
+            log.info("Using MOCK_SYNC")
+            strategy = ldap3.MOCK_SYNC
+            # This is needed because using MOCK with ServerPool is broken,
+            # see https://github.com/cannatag/ldap3/issues/1007
+            server_arg = ldap3.Server("fake_server")
+
         log.debug(
-            "Opening connection with bind user '{}'".format(bind_user or "Anonymous")
+            "Opening connection with bind user '{}' [{}]".format(
+                bind_user or "Anonymous", strategy
+            )
         )
         connection = ldap3.Connection(
-            server=app.ldap3_login_manager_server_pool,
+            server=server_arg,
             read_only=current_app.config.get("LDAP_READONLY"),
             user=bind_user,
             password=bind_password,
-            client_strategy=ldap3.SYNC,
+            client_strategy=strategy,
             authentication=authentication,
             check_names=current_app.config["LDAP_CHECK_NAMES"],
             raise_exceptions=True,
             **kwargs
         )
+
+        if current_app.config.get("LDAP_MOCK_DATA") is not None:
+            # TODO: Should use current_app.instance_path relative path
+            #  or app.open_instance_resource to open file, but entries_from_json
+            #  expects a filename to open, not file data.
+            log.info(
+                "Loading LDAP_MOCK_DATA from: {}".format(
+                    current_app.config.get("LDAP_MOCK_DATA")
+                )
+            )
+            connection.strategy.entries_from_json(
+                current_app.config.get("LDAP_MOCK_DATA")
+            )
 
         if contextualise:
             self._contextualise_connection(connection)

@@ -1,3 +1,5 @@
+import json
+
 import ldap3
 
 DIRECTORY = {
@@ -9,6 +11,7 @@ DIRECTORY = {
                 "objectclass": ["person"],
                 "dn": "cn=Bind,dc=mydomain,dc=com",
                 "password": "bind123",
+                "userPassword": "bind123",
             },
             "ou=users": {
                 "cn=Nick Whyte": {
@@ -90,3 +93,32 @@ def get_directory_base_recurse(location, directory):
 def get_directory_base(dn):
     location = list(reversed(dn.split(",")))
     return get_directory_base_recurse(location, directory=DIRECTORY)
+
+
+def key_path_recurse(d, path=None):
+    """Used by `dump_directory_to_file` to flatten DIRECTORY"""
+    keys = d.keys()
+    if any("=" in k for k in d):  # If any keys have "=", assume they are paths.
+        result = list()
+        for k in keys:
+            new_path = ",".join([k, path]) if path else k
+            kres = key_path_recurse(d[k], path=new_path)
+            if isinstance(kres, list):
+                result.extend(kres)
+            elif isinstance(kres, dict):
+                result.append(kres)
+            else:
+                raise ValueError("Unexpected type for key result: {}".format(kres))
+        return result
+    else:  # Otherwise, assume it's the attributes.
+        return {"dn": path, "raw": d}
+
+
+def dump_directory_to_file(filename):
+    """
+    Reformat the test directory data to a format used
+    by ldap3.MockBaseStrategy.entries_from_json and save it to filename
+    """
+    entries = key_path_recurse(DIRECTORY)
+    with open(filename, "w") as outfile:
+        json.dump({"entries": entries}, outfile, indent=2)

@@ -13,10 +13,21 @@ Core
                                          connecting to LDAP. Defaults to 
                                          ``389``.
 
-``LDAP_HOST``                            Speficies the address of the server to
-                                         connect to by default. ``None``.
+``LDAP_HOST``                            Specifies the address of the default
+                                         server to use when connecting to LDAP.
                                          Additional servers can be added via the
                                          ``add_server`` method.
+                                         Defaults to ``None``.
+
+``LDAP_MOCK_DATA``                       If specified, configures
+                                         ``ldap3.Connection`` with
+                                         ``client_strategy=MOCK_SYNC`` to setup
+                                         testing with a mock LDAP connection.
+                                         [#ldap3mock]_
+                                         Useful for running unit tests.
+                                         The value is used to point to a json
+                                         entries file to load data to the DIT.
+                                         Defaults to ``None`` (no mocking).
 
 ``LDAP_USE_SSL``                         Specifies whether the default server
                                          connection should use SSL. Defaults to
@@ -160,3 +171,7 @@ Filters/Searching
                                      Defaults to ``ldap3.ALL_ATTRIBUTES``       
 
 ==================================== ================================================
+
+
+.. [#ldap3mock] For details about mocking the ldap3.Connection,
+   see `Mocking -- ldap3 documentation <https://ldap3.readthedocs.io/en/latest/mocking.html>`_
