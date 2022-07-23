@@ -29,7 +29,7 @@ class LDAPLoginForm(FlaskForm):
     remember_me = wtforms.BooleanField('Remember Me', default=True)
 
     def validate_ldap(self):
-        logging.debug('Validating LDAPLoginForm against LDAP')
+        log.debug('Validating LDAPLoginForm against LDAP')
         'Validate the username/password data against ldap directory'
         ldap_mgr = current_app.ldap3_login_manager
         username = self.username.data
@@ -62,7 +62,7 @@ class LDAPLoginForm(FlaskForm):
 
         valid = FlaskForm.validate(self, *args, **kwargs)
         if not valid:
-            logging.debug("Form validation failed before we had a chance to "
+            log.debug("Form validation failed before we had a chance to "
                           "check ldap. Reasons: '{0}'".format(self.errors))
             return valid
 
