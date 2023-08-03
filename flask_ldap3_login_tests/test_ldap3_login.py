@@ -5,7 +5,7 @@ import unittest
 
 import flask
 import mock
-from flask import abort
+from flask import abort, g
 from ldap3 import Tls
 
 import flask_ldap3_login as ldap3_login
@@ -13,11 +13,6 @@ from flask_ldap3_login.forms import LDAPLoginForm
 
 from .Directory import DIRECTORY, dump_directory_to_file
 from .MockTypes import Connection, Server, ServerPool
-
-try:
-    from flask import _app_ctx_stack as stack
-except ImportError:
-    from flask import _request_ctx_stack as stack
 
 log = logging.getLogger(__name__)
 
@@ -60,8 +55,6 @@ class AuthenticateDirectTestCase(BaseTestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
-
         super().tearDown()
 
     def test_login(self):
@@ -114,7 +107,6 @@ class DirectBindPrefixTestCase(BaseTestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
         super().tearDown()
 
     def test_login(self):
@@ -142,7 +134,6 @@ class DirectBindSuffixTestCase(BaseTestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
         super().tearDown()
 
     def test_login(self):
@@ -171,7 +162,6 @@ class EmptyUserGroupDNTestCase(BaseTestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
         super().tearDown()
 
     def test_login(self):
@@ -208,7 +198,6 @@ class BadServerAddressTestCase(BaseTestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
         super().tearDown()
 
     def test_direct_bind_with_bad_server(self):
@@ -244,7 +233,6 @@ class AuthenticateSearchTestCase(BaseTestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
         super().tearDown()
 
     def test_login(self):
@@ -306,7 +294,6 @@ class FailOnMultipleFoundTestCase(BaseTestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
         super().tearDown()
 
     def test_ambiguious_login_field(self):
@@ -335,7 +322,6 @@ class GroupMembershipTestCase(BaseTestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
         super().tearDown()
 
     def test_group_membership(self):
@@ -364,7 +350,6 @@ class GetUserInfoTestCase(BaseTestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
         super().tearDown()
 
     def test_get_user_info_for_username(self):
@@ -383,7 +368,6 @@ class SpecialCharactersTestCase(BaseTestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
         super().tearDown()
 
     def test_get_user_groups_special_characters(self):
@@ -404,7 +388,6 @@ class GroupExistsTestCase(BaseTestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
         super().tearDown()
 
     def test_group_exists(self):
@@ -425,29 +408,29 @@ class SessionContextTextCase(BaseTestCase):
     def test_context_push(self):
         with self.app.test_request_context():
             connection = self.manager.connection
-            self.assertTrue(hasattr(stack.top, "ldap3_manager_main_connection"))
+            self.assertTrue(hasattr(g, "flask_ldap3_login_manager_main_connection"))
             connection2 = self.manager.connection
 
             self.assertEqual(connection, connection2)
 
         with self.app.test_request_context():
             # Get a new context
-            self.assertFalse(hasattr(stack.top, "ldap3_manager_main_connection"))
+            self.assertFalse(hasattr(g, "flask_ldap3_login_manager_main_connection"))
 
     def test_context_pop_on_exception(self):
         try:
             with self.app.test_request_context():
                 self.manager.connection
                 self.manager._make_connection()
-                self.assertEqual(len(stack.top.ldap3_manager_connections), 1)
+                self.assertEqual(len(g.flask_ldap3_login_manager_connections), 1)
                 # Raise an exception so teardown gets done
                 abort(404)
         except Exception:
             pass
 
         with self.app.test_request_context():
-            self.assertFalse(hasattr(stack.top, "ldap3_manager_main_connection"))
-            self.assertFalse(hasattr(stack.top, "ldap3_manager_connections"))
+            self.assertFalse(hasattr(g, "flask_ldap3_login_manager_connections"))
+            self.assertFalse(hasattr(g, "flask_ldap3_login_manager_main_connection"))
 
 
 @mock.patch("ldap3.ServerPool", new=ServerPool)
@@ -624,7 +607,6 @@ class LdapCheckNamesTestCase(BaseTestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
         super().tearDown()
 
     @mock.patch("ldap3.Connection")
@@ -664,7 +646,6 @@ class MockConnectionTestCase(unittest.TestCase):
         self.app.app_context().push()
 
     def tearDown(self):
-        stack.top.pop()
         super().tearDown()
         os.close(self.ldap_dump_fd)
         os.unlink(self.ldap_dump_path)
