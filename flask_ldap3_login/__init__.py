@@ -198,7 +198,7 @@ class LDAP3LoginManager:
             if hasattr(ctx, "ldap3_manager_connections"):
                 for connection in ctx.ldap3_manager_connections:
                     self.destroy_connection(connection)
-            if hasattr(ctx, "ldap3_manager_main_connection"):
+            if hasattr(ctx, "ldap3_manager_main_connection") and ctx.ldap3_manager_main_connection is not None:
                 log.debug("Unbinding a connection used within the request context.")
                 ctx.ldap3_manager_main_connection.unbind()
                 ctx.ldap3_manager_main_connection = None
