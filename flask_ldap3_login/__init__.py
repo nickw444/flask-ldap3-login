@@ -1,4 +1,5 @@
 import logging
+import os.path
 from enum import Enum
 
 import ldap3
@@ -803,17 +804,13 @@ class LDAP3LoginManager:
         )
 
         if app.config.get("LDAP_MOCK_DATA") is not None:
-            # TODO: Should use current_app.instance_path relative path
-            #  or app.open_instance_resource to open file, but entries_from_json
-            #  expects a filename to open, not file data.
-            log.info(
-                "Loading LDAP_MOCK_DATA from: {}".format(
-                    current_app.config.get("LDAP_MOCK_DATA")
-                )
-            )
-            connection.strategy.entries_from_json(
-                current_app.config.get("LDAP_MOCK_DATA")
-            )
+            mock_data = app.config.get("LDAP_MOCK_DATA")
+            # First, try original functionality, using path directly
+            # If configured path is not a file, then try to use the newer instance path relative location
+            if not os.path.isfile(mock_data):
+                mock_data = os.path.join(app.auto_find_instance_path(), current_app.config.get("LDAP_MOCK_DATA"))
+            log.info("Loading LDAP_MOCK_DATA from: {}".format(mock_data))
+            connection.strategy.entries_from_json(mock_data)
 
         if contextualise:
             self._contextualise_connection(connection)
@@ -825,7 +822,7 @@ class LDAP3LoginManager:
         unbinds it.
 
         Args:
-            connection (ldap3.Connection):  The connnection to destroy
+            connection (ldap3.Connection):  The connection to destroy
         """
 
         log.debug("Destroying connection at <{}>".format(hex(id(connection))))
