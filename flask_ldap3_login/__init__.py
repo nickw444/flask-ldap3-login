@@ -1,13 +1,9 @@
 import logging
+import os.path
 from enum import Enum
 
 import ldap3
-from flask import current_app
-
-try:
-    from flask import _app_ctx_stack as stack
-except ImportError:  # pragma: no cover
-    from flask import _request_ctx_stack as stack
+from flask import current_app, g
 
 
 log = logging.getLogger(__name__)
@@ -150,7 +146,7 @@ class LDAP3LoginManager:
             ldap3.Server: The freshly created server object.
         """
         if app is None:
-            app = current_app._get_current_object()
+            app = current_app
         if not use_ssl and tls_ctx:
             raise ValueError("Cannot specify a TLS context and not use SSL!")
         server = ldap3.Server(hostname, port=port, use_ssl=use_ssl, tls=tls_ctx)
@@ -167,12 +163,10 @@ class LDAP3LoginManager:
 
         """
 
-        ctx = stack.top
-        if ctx is not None:
-            if not hasattr(ctx, "ldap3_manager_connections"):
-                ctx.ldap3_manager_connections = [connection]
-            else:
-                ctx.ldap3_manager_connections.append(connection)
+        if not hasattr(g, "flask_ldap3_login_manager_connections"):
+            g.flask_ldap3_login_manager_connections = [connection]
+        else:
+            g.flask_ldap3_login_manager_connections.append(connection)
 
     def _decontextualise_connection(self, connection):
         """
@@ -184,24 +178,23 @@ class LDAP3LoginManager:
 
         """
 
-        ctx = stack.top
-        if ctx is not None and connection in ctx.ldap3_manager_connections:
-            ctx.ldap3_manager_connections.remove(connection)
+        if (hasattr(g, "flask_ldap3_login_manager_connections") and
+                connection in g.flask_ldap3_login_manager_connections):
+            g.flask_ldap3_login_manager_connections.remove(connection)
 
     def teardown(self, exception):
         """
         Cleanup after a request. Close any open connections.
         """
 
-        ctx = stack.top
-        if ctx is not None:
-            if hasattr(ctx, "ldap3_manager_connections"):
-                for connection in ctx.ldap3_manager_connections:
-                    self.destroy_connection(connection)
-            if hasattr(ctx, "ldap3_manager_main_connection"):
-                log.debug("Unbinding a connection used within the request context.")
-                ctx.ldap3_manager_main_connection.unbind()
-                ctx.ldap3_manager_main_connection = None
+        if hasattr(g, "flask_ldap3_login_manager_connections"):
+            for connection in g.flask_ldap3_login_manager_connections:
+                self.destroy_connection(connection)
+        if (hasattr(g, "flask_ldap3_login_manager_main_connection") and
+                g.flask_ldap3_login_manager_main_connection is not None):
+            log.debug("Unbinding a connection used within the request context.")
+            g.flask_ldap3_login_manager_main_connection.unbind()
+            g.flask_ldap3_login_manager_main_connection = None
 
     def save_user(self, callback):
         """
@@ -712,10 +705,9 @@ class LDAP3LoginManager:
         Raises:
             ldap3.core.exceptions.LDAPException: Since this method is performing
                 a bind on behalf of the caller. You should handle this case
-                occuring, such as invalid service credentials.
+                occurring, such as invalid service credentials.
         """
-        ctx = stack.top
-        if ctx is None:
+        if g is None:
             raise Exception(
                 "Working outside of the Flask application "
                 "context. If you wish to make a connection outside of a flask"
@@ -723,8 +715,8 @@ class LDAP3LoginManager:
                 "and use manager.make_connection()"
             )
 
-        if hasattr(ctx, "ldap3_manager_main_connection"):
-            return ctx.ldap3_manager_main_connection
+        if hasattr(g, "flask_ldap3_login_manager_main_connection"):
+            return g.flask_ldap3_login_manager_main_connection
         else:
             connection = self._make_connection(
                 bind_user=current_app.config.get("LDAP_BIND_USER_DN"),
@@ -732,8 +724,7 @@ class LDAP3LoginManager:
                 contextualise=False,
             )
             connection.bind()
-            if ctx is not None:
-                ctx.ldap3_manager_main_connection = connection
+            g.flask_ldap3_login_manager_main_connection = connection
             return connection
 
     def make_connection(self, bind_user=None, bind_password=None, app=None, **kwargs):
@@ -777,15 +768,15 @@ class LDAP3LoginManager:
         """
 
         if app is None:
-            app = current_app._get_current_object()
+            app = current_app
 
         authentication = ldap3.ANONYMOUS
         if bind_user:
             authentication = getattr(
-                ldap3, current_app.config.get("LDAP_BIND_AUTHENTICATION_TYPE")
+                ldap3, app.config.get("LDAP_BIND_AUTHENTICATION_TYPE")
             )
 
-        if current_app.config.get("LDAP_MOCK_DATA") is None:
+        if app.config.get("LDAP_MOCK_DATA") is None:
             strategy = ldap3.SYNC
             server_arg = app.ldap3_login_manager_server_pool
         else:
@@ -802,28 +793,24 @@ class LDAP3LoginManager:
         )
         connection = ldap3.Connection(
             server=server_arg,
-            read_only=current_app.config.get("LDAP_READONLY"),
+            read_only=app.config.get("LDAP_READONLY"),
             user=bind_user,
             password=bind_password,
             client_strategy=strategy,
             authentication=authentication,
-            check_names=current_app.config["LDAP_CHECK_NAMES"],
+            check_names=app.config["LDAP_CHECK_NAMES"],
             raise_exceptions=True,
             **kwargs
         )
 
-        if current_app.config.get("LDAP_MOCK_DATA") is not None:
-            # TODO: Should use current_app.instance_path relative path
-            #  or app.open_instance_resource to open file, but entries_from_json
-            #  expects a filename to open, not file data.
-            log.info(
-                "Loading LDAP_MOCK_DATA from: {}".format(
-                    current_app.config.get("LDAP_MOCK_DATA")
-                )
-            )
-            connection.strategy.entries_from_json(
-                current_app.config.get("LDAP_MOCK_DATA")
-            )
+        if app.config.get("LDAP_MOCK_DATA") is not None:
+            mock_data = app.config.get("LDAP_MOCK_DATA")
+            # First, try original functionality, using path directly
+            # If configured path is not a file, then try to use the newer instance path relative location
+            if not os.path.isfile(mock_data):
+                mock_data = os.path.join(app.auto_find_instance_path(), current_app.config.get("LDAP_MOCK_DATA"))
+            log.info("Loading LDAP_MOCK_DATA from: {}".format(mock_data))
+            connection.strategy.entries_from_json(mock_data)
 
         if contextualise:
             self._contextualise_connection(connection)
@@ -835,7 +822,7 @@ class LDAP3LoginManager:
         unbinds it.
 
         Args:
-            connection (ldap3.Connection):  The connnection to destroy
+            connection (ldap3.Connection):  The connection to destroy
         """
 
         log.debug("Destroying connection at <{}>".format(hex(id(connection))))
