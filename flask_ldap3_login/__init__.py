@@ -5,7 +5,6 @@ from enum import Enum
 import ldap3
 from flask import current_app, g
 
-
 log = logging.getLogger(__name__)
 
 AuthenticationResponseStatus = Enum("AuthenticationResponseStatus", "fail success")
@@ -178,8 +177,10 @@ class LDAP3LoginManager:
 
         """
 
-        if (hasattr(g, "flask_ldap3_login_manager_connections") and
-                connection in g.flask_ldap3_login_manager_connections):
+        if (
+            hasattr(g, "flask_ldap3_login_manager_connections")
+            and connection in g.flask_ldap3_login_manager_connections
+        ):
             g.flask_ldap3_login_manager_connections.remove(connection)
 
     def teardown(self, exception):
@@ -190,8 +191,10 @@ class LDAP3LoginManager:
         if hasattr(g, "flask_ldap3_login_manager_connections"):
             for connection in g.flask_ldap3_login_manager_connections:
                 self.destroy_connection(connection)
-        if (hasattr(g, "flask_ldap3_login_manager_main_connection") and
-                g.flask_ldap3_login_manager_main_connection is not None):
+        if (
+            hasattr(g, "flask_ldap3_login_manager_main_connection")
+            and g.flask_ldap3_login_manager_main_connection is not None
+        ):
             log.debug("Unbinding a connection used within the request context.")
             g.flask_ldap3_login_manager_main_connection.unbind()
             g.flask_ldap3_login_manager_main_connection = None
@@ -806,9 +809,13 @@ class LDAP3LoginManager:
         if app.config.get("LDAP_MOCK_DATA") is not None:
             mock_data = app.config.get("LDAP_MOCK_DATA")
             # First, try original functionality, using path directly
-            # If configured path is not a file, then try to use the newer instance path relative location
+            # If configured path is not a file, then try to use the newer instance path
+            # relative location
             if not os.path.isfile(mock_data):
-                mock_data = os.path.join(app.auto_find_instance_path(), current_app.config.get("LDAP_MOCK_DATA"))
+                mock_data = os.path.join(
+                    app.auto_find_instance_path(),
+                    current_app.config.get("LDAP_MOCK_DATA"),
+                )
             log.info("Loading LDAP_MOCK_DATA from: {}".format(mock_data))
             connection.strategy.entries_from_json(mock_data)
 

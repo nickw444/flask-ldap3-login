@@ -6,7 +6,7 @@ from setuptools import setup
 def get_version():
     version_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "VERSION")
     v = open(version_path).read()
-    if type(v) == str:
+    if v is str:
         return v.strip()
     return v.decode("UTF-8").strip()
 
