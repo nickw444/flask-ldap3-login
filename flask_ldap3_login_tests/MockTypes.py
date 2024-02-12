@@ -53,7 +53,7 @@ def build_comparison(cmp_string):
             field, value = match.group(1, 2)
 
             def lamb(data):
-                return data is dict and field in data and value in data[field]
+                return isinstance(data, dict) and field in data and value in data[field]
 
             return lamb
         else:
@@ -132,7 +132,7 @@ class Connection(mock.MagicMock):
                     if check_user(item):
                         items.append(item)
 
-                    if item is dict:
+                    if isinstance(item, dict):
                         items.extend(recurse_search(item))
 
                 return items
