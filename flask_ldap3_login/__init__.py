@@ -99,6 +99,7 @@ class LDAP3LoginManager(object):
         self.config.setdefault('LDAP_PORT', 389)
         self.config.setdefault('LDAP_HOST', None)
         self.config.setdefault('LDAP_USE_SSL', False)
+        self.config.setdefault('LDAP_USE_STARTTLS', False)
         self.config.setdefault('LDAP_READONLY', True)
         self.config.setdefault('LDAP_CHECK_NAMES', True)
         self.config.setdefault('LDAP_BIND_DIRECT_CREDENTIALS', False)
@@ -160,8 +161,7 @@ class LDAP3LoginManager(object):
         Returns:
             ldap3.Server: The freshly created server object.
         """
-        if not use_ssl and tls_ctx:
-            raise ValueError("Cannot specify a TLS context and not use SSL!")
+
         server = ldap3.Server(
             hostname,
             port=port,
@@ -791,6 +791,8 @@ class LDAP3LoginManager(object):
             raise_exceptions=True,
             **kwargs
         )
+        if self.config.get('LDAP_USE_STARTTLS'):
+            connection.start_tls()
 
         if contextualise:
             self._contextualise_connection(connection)
