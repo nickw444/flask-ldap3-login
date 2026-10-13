@@ -1,5 +1,7 @@
 Pallets-Sphinx-Themes==2.0.2
 Sphinx==4.3.0
+# Sphinx 4.3 imports pkg_resources, removed in setuptools 81.
+setuptools<81
 sphinxcontrib-applehelp==1.0.2
 sphinxcontrib-devhelp==1.0.2
 sphinxcontrib-htmlhelp==2.0.0
