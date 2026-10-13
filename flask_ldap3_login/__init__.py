@@ -295,7 +295,7 @@ class LDAP3LoginManager:
                 # User wants extra info about the bind
                 user_filter = "({search_attr}={username})".format(
                     search_attr=current_app.config.get("LDAP_USER_LOGIN_ATTR"),
-                    username=username,
+                    username=ldap3.utils.conv.escape_filter_chars(username),
                 )
                 search_filter = "(&{}{})".format(
                     current_app.config.get("LDAP_USER_OBJECT_FILTER"), user_filter
@@ -430,7 +430,7 @@ class LDAP3LoginManager:
         # Find the user in the search path.
         user_filter = "({search_attr}={username})".format(
             search_attr=current_app.config.get("LDAP_USER_LOGIN_ATTR"),
-            username=username,
+            username=ldap3.utils.conv.escape_filter_chars(username),
         )
         search_filter = "(&{}{})".format(
             current_app.config.get("LDAP_USER_OBJECT_FILTER"), user_filter
@@ -623,7 +623,7 @@ class LDAP3LoginManager:
         """
         ldap_filter = "(&({}={}){})".format(
             current_app.config.get("LDAP_USER_LOGIN_ATTR"),
-            username,
+            ldap3.utils.conv.escape_filter_chars(username),
             current_app.config.get("LDAP_USER_OBJECT_FILTER"),
         )
 
